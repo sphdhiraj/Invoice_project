@@ -1,0 +1,17 @@
+<!-- <div class="layout-wrapper">
+  <app-topbar (sideNavToggled)="handleSideNavToggle()"></app-topbar>
+  
+  <div class="layout-main-container">
+    <div class="layout-sidebar"   [ngClass]="{'app-side-nav': sidenavstatus}">
+      <app-sidebar  [opened]="sidenavstatus" ></app-sidebar>
+     </div>
+         <div class="layout">
+              <div class="containt-section"[ngClass]="{'app-side-nav-shrink': sidenavstatus}">
+                <router-outlet ></router-outlet>
+            </div>
+      </div>
+  </div>
+ 
+</div> -->
+<router-outlet></router-outlet>
+

@@ -1,0 +1,51 @@
+
+<!-- <div class="">
+<div class="sidebar">
+   <input type="checkbox" id="click">
+      <label for="click">
+          <i class='menu-btn bx bx-menu'></i>
+          <i class='close-btn bx bx-x-circle'></i>
+      </label>
+
+   <div class="sidenav">
+      
+       <div class="icon_items">
+           <ul>
+               <li class="">
+                   <i class='bx bxs-home'></i>
+                   <a href="#">Home</a>
+               </li>
+              
+           </ul>
+       </div>
+   </div>
+</div>
+</div> -->
+
+<div class="sidebar" [ngClass]="{'app-side-nav-shrink': opened}">
+    <div class="header">
+       <ul class="nav-list pt-1">
+          <li class="nav-list-item "> <a routerLink="/inbox"> <i class='bx bxs-message-dots'></i> Inbox</a>
+
+          </li>
+          <li class="nav-list-item ">
+           
+            <a href="#"> <i class='bx bxs-user-circle'></i> User</a>
+        </li>
+       
+        <li class="nav-list-item ">
+            
+            <a href="#"> <i class='bx bxs-group' ></i> Group</a>
+        </li>
+        <li class="nav-list-item ">
+            
+            <a href="#"> <i class='bx bxs-help-circle' ></i> Help</a>
+        </li>
+        
+        <li class="nav-list-item ">
+           
+            <a (click)="logout()" > <i class='bx bx-log-in' ></i> Logout</a>
+        </li>
+       </ul>
+    </div>
+ </div>

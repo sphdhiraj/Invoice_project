@@ -1,0 +1,27 @@
+<div class=" container-fluid headerbar p-0">
+  <div class="row">
+     <div class="col p-0">
+        <header>
+        <span>
+          <a class=" toggleIcon" (click)="sideNavToggle($event)"><i class="fa-solid fa-bars"></i></a>
+          <a class="layout-topbar-logo" routerLink="">             
+              <img src="https://www.unitres.co.in/wp-content/uploads/2019/05/sophtimize.png" alt="logo" class="logo ">                
+          </a>
+        </span>
+        <nav>
+          <ul>
+            <li><a routerLink="/inbox">Inbox<span class="count">{{count}}</span></a>
+             
+            </li>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </nav>
+        </header>
+     </div>
+  </div>
+</div>
+  
+    

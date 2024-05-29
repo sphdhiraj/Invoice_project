@@ -1,0 +1,9 @@
+pymongo
+google-cloud-documentai
+watchdog
+PyMuPDF
+pandas
+fastapi
+PYJWT
+Pillow
+bcrypt
