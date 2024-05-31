@@ -6,15 +6,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"golang.org/x/crypto/bcrypt"
 )
+
+var jwtSecret = []byte("InVoice")
 
 type Organization struct {
 	OrgID              primitive.ObjectID `json:"orgId,omitempty" bson:"_id,omitempty"`
@@ -24,6 +29,11 @@ type Organization struct {
 	ContactPersonEmail string             `json:"contactPersonEmail" bson:"contactPersonEmail"`
 	ContactPersonPhone string             `json:"contactPersonPhone" bson:"contactPersonPhone"`
 	OrgStatus          string             `json:"orgStatus" bson:"orgStatus"`
+	InvoiceEmail       string             `json:"invoiceEmail" bson:"invoiceEmail"`
+	SMTPUsername       string             `json:"smtpUsername" bson:"smtpUsername"`
+	SMTPPassword       string             `json:"smtpPassword" bson:"smtpPassword"`
+	SMTPURL            string             `json:"smtpURL" bson:"smtpURL"`
+	SMTPPORT           string             `json:"smtpPort" bson:"smtpPort"`
 }
 
 type OrganizationUser struct {
@@ -33,6 +43,7 @@ type OrganizationUser struct {
 	UserEmail      string             `json:"userEmail" bson:"userEmail"`
 	UserPhone      string             `json:"userPhone" bson:"userPhone"`
 	UserStatus     string             `json:"userStatus" bson:"userStatus"`
+	Password       string             `json:"password" bson:"password"`
 	UserRoleID     primitive.ObjectID `json:"userRoleId" bson:"userRoleId"`
 }
 
@@ -40,18 +51,41 @@ type UserRole struct {
 	RoleID     primitive.ObjectID `json:"roleId,omitempty" bson:"_id,omitempty"`
 	RoleName   string             `json:"roleName" bson:"roleName"`
 	RoleStatus string             `json:"roleStatus" bson:"roleStatus"`
+	OrgID      primitive.ObjectID `json:"orgId" bson:"orgId"`
 }
 
 type OrgAccessRights struct {
 	AccessRightsID primitive.ObjectID `json:"accessRightsId,omitempty" bson:"_id,omitempty"`
 	OrgID          primitive.ObjectID `json:"orgId" bson:"orgId"`
 	ModuleID       primitive.ObjectID `json:"moduleId" bson:"moduleId"`
-	Permission     string             `json:"permission" bson:"permission"`
+	Permission     bool               `json:"permission" bson:"permission"`
 }
 
 type Module struct {
-	ModuleID   primitive.ObjectID `json:"moduleId,omitempty" bson:"_id,omitempty"`
-	ModuleName string             `json:"moduleName" bson:"moduleName"`
+	ModuleID    primitive.ObjectID `json:"moduleId,omitempty" bson:"_id,omitempty"`
+	ModuleName  string             `json:"moduleName" bson:"moduleName"`
+	DisplayName string             `json:"displayName" bson:"displayName"`
+	Component   string             `json:"component" bson:"component"`
+	Action      string             `json:"action" bson:"action"`
+}
+
+type AccessRights struct {
+	AccessRightsID primitive.ObjectID `json:"accessRightsId,omitempty" bson:"_id,omitempty"`
+	RoleID         primitive.ObjectID `json:"roleId" bson:"roleId"`
+	OrgID          primitive.ObjectID `json:"orgId" bson:"orgId"`
+	ModuleID       primitive.ObjectID `json:"moduleId" bson:"moduleId"`
+	ViewAccess     bool               `json:"viewAccess" bson:"viewAccess"`
+	AddAccess      bool               `json:"addAccess" bson:"addAccess"`
+	EditAccess     bool               `json:"editAccess" bson:"editAccess"`
+	DeleteAccess   bool               `json:"deleteAccess" bson:"deleteAccess"`
+	PrintAccess    bool               `json:"printAccess" bson:"printAccess"`
+	CancelAccess   bool               `json:"cancelAccess" bson:"cancelAccess"`
+	AllAccess      bool               `json:"allAccess" bson:"allAccess"`
+}
+
+type LoginRequest struct {
+	UserEmail string `json:"userEmail" binding:"required"`
+	Password  string `json:"password" binding:"required"`
 }
 
 type OrganizationUserResponse struct {
@@ -104,16 +138,33 @@ type Manager interface {
 	DeleteModule(primitive.ObjectID) error
 	UpdateModule(Module) error
 
+	//AccessRights
+	InsertAccessRights(interface{}) error
+	GetAllAccessRights() ([]AccessRights, error)
+	UpdateAccessRights(AccessRights) error
+
 	GetUsersByOrganization(objectID primitive.ObjectID) ([]OrganizationUserResponse, error)
+
+	GetOrgModuleListByOrgID(orgID primitive.ObjectID) ([]Module, error)
+
+	LoginUser(email, password string) (OrganizationUser, error)
+
+	GetOrganizationDetailsByID(id primitive.ObjectID) (Organization, error)
+
+	GetAccessRightsByRoleIDandOrgId(roleID, orgID primitive.ObjectID) ([]AccessRights, error)
+
+	GetModuleByID(id primitive.ObjectID) (Module, error)
 }
 
 func connectDb() {
 	uri := "mongodb://localhost:27017"
+	// uri := "mongodb+srv://Root:Root@invoicedatabase.gicc9wm.mongodb.net/"
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("Failed to create MongoDB client: %v", err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx := context.Background()
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v", err)
@@ -124,7 +175,8 @@ func connectDb() {
 		log.Fatalf("Failed to ping MongoDB: %v", err)
 	}
 	fmt.Println("Connected!!!")
-	Mgr = &manager{connection: client, ctx: ctx, cancel: cancel}
+	//Mgr = &manager{connection: client, ctx: ctx, cancel: cancel}
+	Mgr = &manager{connection: client, ctx: ctx, cancel: func() {}}
 }
 
 func close(client *mongo.Client, ctx context.Context, cancel context.CancelFunc) {
@@ -169,36 +221,188 @@ func main() {
 	r.DELETE("/modules/:id", deleteModule)
 	r.PUT("/modules", updateModule)
 
+	r.POST("/access-rights", insertAccessRights)
+	r.GET("/access-rights", getAllAccessRights)
+
 	r.GET("/organizations/:id", getUsersByOrganization)
+
+	r.GET("/organizationssss/:id", getOrgModuleListByOrgID)
+
+	r.POST("/login", loginUser)
 
 	r.Run(":9090")
 
 }
+func loginUser(c *gin.Context) {
+	var loginReq LoginRequest
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// func insertOrganization(c *gin.Context) {
-// 	var org Organization
-// 	if err := c.BindJSON(&org); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	user, err := Mgr.LoginUser(loginReq.UserEmail, loginReq.Password)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
+		return
+	}
 
-// 	if org.OrgID.IsZero() {
-// 		// Insert a new organization
-// 		if err := Mgr.Insert(org); err != nil {
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 			return
-// 		}
-// 		c.JSON(http.StatusOK, gin.H{"message": "Organization inserted"})
+	// Generate JWT token
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := jwt.MapClaims{
+		"userId":    user.UserID.Hex(),
+		"userEmail": user.UserEmail,
+		"exp":       expirationTime.Unix(),
+	}
 
-//		} else {
-//			// Update existing organization
-//			if err := Mgr.UpdateData(org); err != nil {
-//				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-//				return
-//			}
-//			c.JSON(http.StatusOK, gin.H{"message": "Organization updated"})
-//		}
-//	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+		return
+	}
+
+	// Fetch organization details
+	organization, err := Mgr.GetOrganizationDetailsByID(user.OrganizationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch organization details"})
+		return
+	}
+
+	// Fetch access rights for user's role and organization
+	accessRights, err := Mgr.GetAccessRightsByRoleIDandOrgId(user.UserRoleID, user.OrganizationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch access rights"})
+		return
+	}
+
+	// Fetch module details for each access right and construct the response
+	var accessRightsResponse []gin.H
+	for _, ar := range accessRights {
+		module, err := Mgr.GetModuleByID(ar.ModuleID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch module details"})
+			return
+		}
+		arResponse := gin.H{
+			"accessRightsId": ar.AccessRightsID.Hex(),
+			"roleId":         ar.RoleID.Hex(),
+			"orgId":          ar.OrgID.Hex(),
+			"moduleId":       ar.ModuleID.Hex(),
+			"moduleName":     module.ModuleName,
+			"displayName":    module.DisplayName,
+			"viewAccess":     ar.ViewAccess,
+			"addAccess":      ar.AddAccess,
+			"editAccess":     ar.EditAccess,
+			"deleteAccess":   ar.DeleteAccess,
+			"printAccess":    ar.PrintAccess,
+			"cancelAccess":   ar.CancelAccess,
+			"allAccess":      ar.AllAccess,
+		}
+		accessRightsResponse = append(accessRightsResponse, arResponse)
+	}
+
+	// Construct the response
+	response := gin.H{
+		"token": tokenString,
+		"user": gin.H{
+			"name":       user.Name,
+			"roleName":   user.UserRoleID.Hex(), // You might want to fetch the role name from UserRole collection
+			"userEmail":  user.UserEmail,
+			"userId":     user.UserID.Hex(),
+			"userPhone":  user.UserPhone,
+			"userRoleId": user.UserRoleID.Hex(),
+			"userStatus": user.UserStatus,
+		},
+		"Organizations": gin.H{
+			"orgId":              organization.OrgID,
+			"orgCode":            organization.OrgCode,
+			"orgName":            organization.OrgName,
+			"contactPerson":      organization.ContactPerson,
+			"contactPersonEmail": organization.ContactPersonEmail,
+			"contactPersonPhone": organization.ContactPersonPhone,
+			"orgStatus":          organization.OrgStatus,
+			"invoiceEmail":       organization.InvoiceEmail,
+			"smtpPassword":       organization.SMTPPassword,
+			"smtpPort":           organization.SMTPPORT,
+			"smtpURL":            organization.SMTPURL,
+			"smtpUsername":       organization.SMTPUsername,
+		},
+		"AccessRights": accessRightsResponse,
+	}
+
+	// Send the response
+	c.JSON(http.StatusOK, response)
+}
+
+func (mgr *manager) GetModuleByID(id primitive.ObjectID) (Module, error) {
+	var module Module
+	moduleCollection := mgr.connection.Database("Invoicedatabase").Collection("modules")
+	filter := bson.M{"_id": id}
+	err := moduleCollection.FindOne(mgr.ctx, filter).Decode(&module)
+	if err != nil {
+		return Module{}, err
+	}
+	return module, nil
+}
+
+func (mgr *manager) LoginUser(email, password string) (OrganizationUser, error) {
+	var user OrganizationUser
+	userCollection := mgr.connection.Database("Invoicedatabase").Collection("organizationUsers")
+	filter := bson.M{"userEmail": email}
+	err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return OrganizationUser{}, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return OrganizationUser{}, fmt.Errorf("invalid email or password")
+	}
+
+	return user, nil
+}
+
+func (mgr *manager) GetOrganizationDetailsByID(id primitive.ObjectID) (Organization, error) {
+	var organization Organization
+	organizationCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
+	filter := bson.M{"_id": id}
+	err := organizationCollection.FindOne(mgr.ctx, filter).Decode(&organization)
+	if err != nil {
+		return Organization{}, err
+	}
+	return organization, nil
+}
+
+func (mgr *manager) GetAccessRightsByRoleIDandOrgId(roleID, orgID primitive.ObjectID) ([]AccessRights, error) {
+	var accessRights []AccessRights
+	accessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("accessRights")
+	filter := bson.M{"roleId": roleID, "orgId": orgID} // Ensure the field names match the BSON tags in AccessRights struct
+
+	cur, err := accessRightsCollection.Find(mgr.ctx, filter)
+	if err != nil {
+		fmt.Println("Error finding access rights:", err)
+		return nil, err
+	}
+	defer cur.Close(mgr.ctx)
+
+	for cur.Next(mgr.ctx) {
+		var ar AccessRights
+		err := cur.Decode(&ar)
+		if err != nil {
+			fmt.Println("Error decoding access rights:", err)
+			return nil, err
+		}
+		accessRights = append(accessRights, ar)
+	}
+	if err := cur.Err(); err != nil {
+		fmt.Println("Cursor error:", err)
+		return nil, err
+	}
+
+	fmt.Println("Access rights fetched:", accessRights)
+	return accessRights, nil
+}
+
 func insertOrganization(c *gin.Context) {
 	var org Organization
 	if err := c.BindJSON(&org); err != nil {
@@ -214,12 +418,22 @@ func insertOrganization(c *gin.Context) {
 			return
 		}
 
-		// Create a directory named with the OrgID
 		folderName := orgID.Hex()
-		err = os.Mkdir(folderName, 0755)
+		baseFolder := "C:\\Users\\hp\\Desktop\\Golang\\invoice_processing-main\\Invoice_project\\Folder\\"
+		err = os.Mkdir(baseFolder+folderName, 0755)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create folder"})
 			return
+		}
+
+		// Create additional subfolders within the organization folder
+		subFolders := []string{"myemails", "Processing_done_file", "test", "test2"}
+		for _, folder := range subFolders {
+			err := os.Mkdir(baseFolder+folderName+"\\"+folder, 0755)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create subfolder: " + folder})
+				return
+			}
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Organization inserted", "orgId": orgID})
@@ -306,6 +520,13 @@ func insertOrganizationUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	user.Password = string(hashedPassword)
 
 	if user.UserID.IsZero() {
 		// Insert a new organization user
@@ -571,17 +792,41 @@ func updateModule(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Module updated"})
 }
 
-//interface--------------------------
+// AccessRights
+func insertAccessRights(c *gin.Context) {
+	var rights AccessRights
+	if err := c.BindJSON(&rights); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// func (mgr *manager) Insert(data interface{}) error {
-// 	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
-// 	result, err := orgCollection.InsertOne(context.TODO(), data)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	fmt.Println(result.InsertedID)
-// 	return nil
-// }
+	if rights.AccessRightsID.IsZero() {
+		// Insert a new access rights
+		if err := Mgr.InsertAccessRights(rights); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Access rights inserted"})
+	} else {
+		// Update existing access rights
+		if err := Mgr.UpdateAccessRights(rights); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Access rights updated"})
+	}
+}
+
+func getAllAccessRights(c *gin.Context) {
+	data, err := Mgr.GetAllAccessRights()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": data})
+}
+
+//interface--------------------------
 
 func (mgr *manager) Insert(data interface{}) (primitive.ObjectID, error) {
 	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
@@ -871,6 +1116,46 @@ func (mgr *manager) UpdateModule(module Module) error {
 	return err
 }
 
+// AccessRight Interface
+func (mgr *manager) InsertAccessRights(data interface{}) error {
+	collection := mgr.connection.Database("Invoicedatabase").Collection("accessRights")
+	result, err := collection.InsertOne(context.TODO(), data)
+	if err != nil {
+		return err
+	}
+	fmt.Println(result.InsertedID)
+	return nil
+}
+
+func (mgr *manager) GetAllAccessRights() ([]AccessRights, error) {
+	var data []AccessRights
+	collection := mgr.connection.Database("Invoicedatabase").Collection("accessRights")
+	cur, err := collection.Find(context.TODO(), bson.M{}, options.Find())
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+	for cur.Next(context.TODO()) {
+		var rights AccessRights
+		if err := cur.Decode(&rights); err != nil {
+			return nil, err
+		}
+		data = append(data, rights)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (mgr *manager) UpdateAccessRights(rights AccessRights) error {
+	collection := mgr.connection.Database("Invoicedatabase").Collection("accessRights")
+	filter := bson.D{{"_id", rights.AccessRightsID}}
+	update := bson.D{{"$set", rights}}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
+}
+
 func getUsersByOrganization(c *gin.Context) {
 	orgID := c.Param("id")
 
@@ -935,4 +1220,76 @@ func (mgr *manager) GetUsersByOrganization(orgID primitive.ObjectID) ([]Organiza
 	}
 
 	return users, nil
+}
+
+func getOrgModuleListByOrgID(c *gin.Context) {
+	id := c.Param("id")
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	modules, err := Mgr.GetOrgModuleListByOrgID(objectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"modules": modules})
+}
+
+func (m *manager) GetOrgModuleListByOrgID(orgID primitive.ObjectID) ([]Module, error) {
+	var modules []Module
+
+	// Define MongoDB collections
+	organizationsCollection := m.connection.Database("Invoicedatabase").Collection("organizations")
+	orgAccessRightsCollection := m.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+	modulesCollection := m.connection.Database("Invoicedatabase").Collection("modules")
+
+	// Verify that the organization exists
+	var organization Organization
+	err := organizationsCollection.FindOne(m.ctx, bson.M{"_id": orgID}).Decode(&organization)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("organization not found")
+		}
+		return nil, fmt.Errorf("failed to find organization: %v", err)
+	}
+
+	// Find all module IDs related to the organization
+	cursor, err := orgAccessRightsCollection.Find(m.ctx, bson.M{"orgId": orgID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find access rights: %v", err)
+	}
+	defer cursor.Close(m.ctx)
+
+	var orgAccessRights []OrgAccessRights
+	if err := cursor.All(m.ctx, &orgAccessRights); err != nil {
+		return nil, fmt.Errorf("failed to decode access rights: %v", err)
+	}
+
+	// Extract all unique module IDs
+	moduleIDs := make(map[primitive.ObjectID]bool)
+	for _, accessRight := range orgAccessRights {
+		moduleIDs[accessRight.ModuleID] = true
+	}
+
+	var moduleObjectIDs []primitive.ObjectID
+	for id := range moduleIDs {
+		moduleObjectIDs = append(moduleObjectIDs, id)
+	}
+
+	// Find all modules by the module IDs
+	cursor, err = modulesCollection.Find(m.ctx, bson.M{"_id": bson.M{"$in": moduleObjectIDs}})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find modules: %v", err)
+	}
+	defer cursor.Close(m.ctx)
+
+	if err := cursor.All(m.ctx, &modules); err != nil {
+		return nil, fmt.Errorf("failed to decode modules: %v", err)
+	}
+
+	return modules, nil
 }
