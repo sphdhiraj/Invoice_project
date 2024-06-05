@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private apiUrl = 'http://localhost:8585/api'; 
+  //private apiUrl = 'http://localhost:9090/organizations'; 
   constructor(private http: HttpClient) {}
 
   
@@ -36,4 +37,5 @@ export class ApiService {
     // const body = { json: data };
     return this.http.post<any>(`${this.apiUrl}/uploadjson`, data, { headers });
   }
+
 }

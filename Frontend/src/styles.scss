@@ -977,7 +977,7 @@ nav a:hover::before {
 }
 
     .card1 {
-        height: 370px;
+        height: auto;
         margin-top: 100px;
         margin-bottom: auto;
         width: 500px;
@@ -1064,4 +1064,8 @@ nav a:hover::before {
 
     .content{
         color:#fff;
+    }
+
+    .card-header{
+        background-color: #000;
     }

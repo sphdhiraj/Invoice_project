@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"time"
 
@@ -128,10 +129,12 @@ type Manager interface {
 	GetUserRoleByID(id primitive.ObjectID) (UserRole, error)
 	UpdateUserRole(UserRole) error
 
-	InsertOrgAccessRights(interface{}) error
+	// InsertOrgAccessRights(interface{}) error
+	InsertOrgAccessRights([]interface{}) error
 	GetAllOrgAccessRights() ([]OrgAccessRights, error)
 	DeleteOrgAccessRights(primitive.ObjectID) error
-	UpdateOrgAccessRights(OrgAccessRights) error
+	// UpdateOrgAccessRights(OrgAccessRights) error
+	UpdateOrgAccessRights([]OrgAccessRights) error
 
 	InsertModule(interface{}) error
 	GetAllModules() ([]Module, error)
@@ -154,11 +157,13 @@ type Manager interface {
 	GetAccessRightsByRoleIDandOrgId(roleID, orgID primitive.ObjectID) ([]AccessRights, error)
 
 	GetModuleByID(id primitive.ObjectID) (Module, error)
+
+	GetModuleOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]gin.H, error)
 }
 
 func connectDb() {
-	uri := "mongodb://localhost:27017"
-	// uri := "mongodb+srv://Root:Root@invoicedatabase.gicc9wm.mongodb.net/"
+	// uri := "mongodb://localhost:27017"
+	uri := "mongodb+srv://Root:Root@invoicedatabase.gicc9wm.mongodb.net/"
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("Failed to create MongoDB client: %v", err)
@@ -192,8 +197,27 @@ func init() {
 	connectDb()
 }
 
+// CORS Middleware
+func CORS(c *gin.Context) {
+
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "*")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Content-Type", "application/json")
+
+	if c.Request.Method != "OPTIONS" {
+
+		c.Next()
+
+	} else {
+
+		c.AbortWithStatus(http.StatusOK)
+	}
+}
+
 func main() {
 	r := gin.Default()
+	r.Use(CORS)
 	r.GET("/organizations", getAllOrganizations)
 	r.POST("/organizations", insertOrganization)
 	r.DELETE("/organizations/:id", deleteOrganization)
@@ -215,7 +239,6 @@ func main() {
 	r.POST("/org-access-rights", insertOrgAccessRights)
 	r.GET("/org-access-rights", getAllOrgAccessRights)
 	r.DELETE("/org-access-rights/:id", deleteOrgAccessRights)
-	r.PUT("/org-access-rights", updateOrgAccessRights)
 	r.POST("/modules", insertModule)
 	r.GET("/modules", getAllModules)
 	r.DELETE("/modules/:id", deleteModule)
@@ -229,10 +252,77 @@ func main() {
 	r.GET("/organizationssss/:id", getOrgModuleListByOrgID)
 
 	r.POST("/login", loginUser)
+	r.GET("/modules-access-rights/:orgid", getModuleOrgAccessRightsByOrgID)
 
 	r.Run(":9090")
 
 }
+
+// Handler function
+func getModuleOrgAccessRightsByOrgID(c *gin.Context) {
+	id := c.Param("orgid")
+	orgID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	data, err := Mgr.GetModuleOrgAccessRightsByOrgID(orgID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": data})
+}
+
+func (mgr *manager) GetModuleOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]gin.H, error) {
+	var accessRights []OrgAccessRights
+	accessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+	filter := bson.M{"orgId": orgID}
+
+	cur, err := accessRightsCollection.Find(mgr.ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(mgr.ctx)
+
+	for cur.Next(mgr.ctx) {
+		var ar OrgAccessRights
+		err := cur.Decode(&ar)
+		if err != nil {
+			return nil, err
+		}
+		accessRights = append(accessRights, ar)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	var results []gin.H
+	moduleCollection := mgr.connection.Database("Invoicedatabase").Collection("modules")
+
+	for _, ar := range accessRights {
+		var module Module
+		moduleFilter := bson.M{"_id": ar.ModuleID}
+		err := moduleCollection.FindOne(mgr.ctx, moduleFilter).Decode(&module)
+		if err != nil {
+			return nil, err
+		}
+
+		result := gin.H{
+			"accessRightsId": ar.AccessRightsID.Hex(),
+			"moduleName":     module.ModuleName,
+			"orgId":          ar.OrgID.Hex(),
+			"moduleId":       ar.ModuleID.Hex(),
+			"permission":     ar.Permission,
+		}
+		results = append(results, result)
+	}
+	fmt.Println(results)
+	return results, nil
+}
+
 func loginUser(c *gin.Context) {
 	var loginReq LoginRequest
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
@@ -419,8 +509,25 @@ func insertOrganization(c *gin.Context) {
 		}
 
 		folderName := orgID.Hex()
-		baseFolder := "C:\\Users\\hp\\Desktop\\Golang\\invoice_processing-main\\Invoice_project\\Folder\\"
-		err = os.Mkdir(baseFolder+folderName, 0755)
+
+		// Get the current working directory
+		currentDir, err := os.Getwd()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get current directory"})
+			return
+		}
+
+		// Move one level up from the current directory
+		parentDir := filepath.Dir(currentDir)
+
+		// Create the base folder path dynamically
+		baseFolder := filepath.Join(parentDir, "Folder")
+
+		// Create the new folder path
+		newFolderPath := filepath.Join(baseFolder, folderName)
+
+		// Create the organization folder
+		err = os.MkdirAll(newFolderPath, 0755)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create folder"})
 			return
@@ -429,7 +536,7 @@ func insertOrganization(c *gin.Context) {
 		// Create additional subfolders within the organization folder
 		subFolders := []string{"myemails", "Processing_done_file", "test", "test2"}
 		for _, folder := range subFolders {
-			err := os.Mkdir(baseFolder+folderName+"\\"+folder, 0755)
+			err := os.Mkdir(filepath.Join(newFolderPath, folder), 0755)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create subfolder: " + folder})
 				return
@@ -673,27 +780,38 @@ func updateUserRole(c *gin.Context) {
 }
 
 func insertOrgAccessRights(c *gin.Context) {
-	var rights OrgAccessRights
+	var rights []OrgAccessRights
 	if err := c.BindJSON(&rights); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if rights.AccessRightsID.IsZero() {
-		// Insert a new organization access rights
-		if err := Mgr.InsertOrgAccessRights(rights); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+	var newRights []interface{}
+	var existingRights []OrgAccessRights
+
+	for _, right := range rights {
+		if right.AccessRightsID.IsZero() {
+			newRights = append(newRights, right)
+		} else {
+			existingRights = append(existingRights, right)
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Organization access rights inserted"})
-	} else {
-		// Update existing organization access rights
-		if err := Mgr.UpdateOrgAccessRights(rights); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "Organization access rights updated"})
 	}
+
+	if len(newRights) > 0 {
+		if err := Mgr.InsertOrgAccessRights(newRights); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if len(existingRights) > 0 {
+		if err := Mgr.UpdateOrgAccessRights(existingRights); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Organization access rights processed"})
 }
 
 func getAllOrgAccessRights(c *gin.Context) {
@@ -717,19 +835,6 @@ func deleteOrgAccessRights(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "OrgAccessRights deleted"})
-}
-
-func updateOrgAccessRights(c *gin.Context) {
-	var rights OrgAccessRights
-	if err := c.BindJSON(&rights); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if err := Mgr.UpdateOrgAccessRights(rights); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "OrgAccessRights updated"})
 }
 
 func insertModule(c *gin.Context) {
@@ -1024,14 +1129,29 @@ func (mgr *manager) UpdateUserRole(role UserRole) error {
 	return err
 }
 
-func (mgr *manager) InsertOrgAccessRights(data interface{}) error {
+func (mgr *manager) InsertOrgAccessRights(data []interface{}) error {
 	collection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
-	result, err := collection.InsertOne(context.TODO(), data)
+	_, err := collection.InsertMany(context.TODO(), data)
 	if err != nil {
 		return err
 	}
-	fmt.Println(result.InsertedID)
 	return nil
+}
+
+func (mgr *manager) UpdateOrgAccessRights(orgAccessRights []OrgAccessRights) error {
+	collection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+	var models []mongo.WriteModel
+
+	for _, right := range orgAccessRights {
+		filter := bson.D{{"_id", right.AccessRightsID}}
+		update := bson.D{{"$set", right}}
+		model := mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update)
+		models = append(models, model)
+	}
+
+	bulkOption := options.BulkWrite().SetOrdered(false)
+	_, err := collection.BulkWrite(context.TODO(), models, bulkOption)
+	return err
 }
 
 func (mgr *manager) GetAllOrgAccessRights() ([]OrgAccessRights, error) {
@@ -1059,14 +1179,6 @@ func (mgr *manager) DeleteOrgAccessRights(id primitive.ObjectID) error {
 	collection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
 	filter := bson.D{{"_id", id}}
 	_, err := collection.DeleteOne(context.TODO(), filter)
-	return err
-}
-
-func (mgr *manager) UpdateOrgAccessRights(orgAccessRights OrgAccessRights) error {
-	collection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
-	filter := bson.D{{"_id", orgAccessRights.AccessRightsID}}
-	update := bson.D{{"$set", orgAccessRights}}
-	_, err := collection.UpdateOne(context.TODO(), filter, update)
 	return err
 }
 

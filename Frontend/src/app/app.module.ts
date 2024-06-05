@@ -31,6 +31,16 @@ import { RegisterComponent } from './component/register/register.component';
 import { LayoutComponent } from './component/layout/layout.component';
 import { LayoutModule } from './component/layout/layout.module';
 import { MessageService } from 'primeng/api';
+import { UserroleComponent } from './component/userrole/userrole.component';
+import { OrganizationComponent } from './component/organization/organization.component';
+import { ModuleNameComponent } from './component/module-name/module-name.component';
+import { OrgAccessRightsComponent } from './component/org-access-rights/org-access-rights.component';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
+//import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
+//import { NgSelectModule } from '@ng-select/ng-select';
+
+
 
 @NgModule({
   declarations: [
@@ -41,6 +51,11 @@ import { MessageService } from 'primeng/api';
     LoginComponent,
     ForgotpasswordComponent,
     RegisterComponent,
+    UserroleComponent,
+    OrganizationComponent,
+    ModuleNameComponent,
+    OrgAccessRightsComponent,
+    UserAccessRightsComponent,
     // LayoutComponent,
   
   ],
@@ -65,7 +80,8 @@ import { MessageService } from 'primeng/api';
     DropdownModule,
     FieldsetModule,
     AccordionModule,
-    LayoutModule
+    LayoutModule,
+    MultiSelectModule,
   ],
   providers: [ MessageService],
   bootstrap: [AppComponent]
