@@ -615,7 +615,7 @@ func insertOrganization(c *gin.Context) {
 		parentDir := filepath.Dir(currentDir)
 
 		// Create the base folder path dynamically
-		baseFolder := filepath.Join(parentDir, "Folder")
+		baseFolder := filepath.Join(parentDir, "Invoice_Folder")
 
 		// Create the new folder path
 		newFolderPath := filepath.Join(baseFolder, folderName)
@@ -628,7 +628,7 @@ func insertOrganization(c *gin.Context) {
 		}
 
 		// Create additional subfolders within the organization folder
-		subFolders := []string{"myemails", "Processing_done_file", "test", "test2"}
+		subFolders := []string{"myemails", "Processing_done_file", "Watch_Folder", "Process_folder"}
 		for _, folder := range subFolders {
 			err := os.Mkdir(filepath.Join(newFolderPath, folder), 0755)
 			if err != nil {
