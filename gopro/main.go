@@ -348,6 +348,7 @@ func (mgr *manager) GetAccessRightsByOrgIDAndRoleID(roleID, orgID primitive.Obje
 			"cancelAccess":  accessRight.CancelAccess,
 			"allAccess":     accessRight.AllAccess,
 			"ModuleName":    module.ModuleName,
+			"DisplayName":   module.DisplayName,
 		})
 	}
 
