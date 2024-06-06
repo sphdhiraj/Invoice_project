@@ -2,7 +2,7 @@
     <div class="item rowborder d-flex">
       <div class="col-md-6">
         <form [formGroup]="formData">
-          <div class="form-group">
+          <div class="form-group" *ngIf="userRights[0].addAccess">
             <select formControlName="optionselected"class="form-select"aria-label="Default select example">
               <option selected >Select Option</option>
               <option *ngFor="let option of emails" [value]="option">{{ option }}</option>
@@ -12,9 +12,9 @@
         </form>
       </div>
       <div class="col-md-6 text-right mt-1">
-         <button class="btnchat mr-4 "(click)="submit()">Submit</button>
-         <button class="btnchat w-auto mr-4 "(click)="downlodcsv()">Download CSV</button>
-         <button (click)="downloadJson()" class="btnchat"><i class="fa-solid fa-download"></i> Export</button>
+         <button class="btnchat mr-4 "(click)="submit()"*ngIf="userRights[0].addAccess">Submit</button>
+         <button class="btnchat w-auto mr-4 "(click)="downlodcsv()" *ngIf="userRights[0].printAccess">Download CSV</button>
+         <button (click)="downloadJson()" class="btnchat"*ngIf="userRights[0].printAccess"><i class="fa-solid fa-download" ></i> Export</button>
       </div>
     </div>
 </div>
@@ -78,8 +78,8 @@
                         </p-cellEditor>
                     </td>
                     <td>
-                        <div class="flex align-items-center justify-content-center gap-2">
-                            <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(product)" class="p-button-rounded p-button-text"></button>
+                        <div class="flex align-items-center justify-content-center gap-2"*ngIf="userRights[0].editAccess">
+                            <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInit(product)" class="p-button-rounded p-button-text" ></button>
                             <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSave(product)" class="p-button-rounded p-button-text p-button-success mr-2"></button>
                             <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancel(product, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
                         </div>

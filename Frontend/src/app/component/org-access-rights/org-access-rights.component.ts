@@ -94,6 +94,7 @@ orgAccessForm!: FormGroup;
       accessRightsId: module.accessRightsId, // Include accessRightsId if needed
       moduleId: module.moduleId,
       moduleName: module.moduleName,
+      submoduleName: module.displayName,
       orgId: selectedOrgId,
       permission: this.permissionsForm.get('permission_' + module.moduleId)?.value
     }));

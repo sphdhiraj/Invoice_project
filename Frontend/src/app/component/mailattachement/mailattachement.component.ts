@@ -52,7 +52,7 @@ export class MailattachementComponent implements OnInit {
 
     this.menuRightsListfetched = this.loginservice.GetMenuRights();
     this.menuRights = JSON.parse(this.menuRightsListfetched);
-     this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
      console.log(this.userRights);
   }
  

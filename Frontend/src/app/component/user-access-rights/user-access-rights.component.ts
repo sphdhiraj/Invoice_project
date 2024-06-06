@@ -255,7 +255,7 @@ export class UserAccessRightsComponent implements OnInit {
       this.objTblUserRights.deleteAccess = element.deleteAccess;
       this.objTblUserRights.cancelAccess = element.cancelAccess;
       this.objTblUserRights.printAccess = element.printAccess;
-     
+      this.objTblUserRights.DisplayName =element.DisplayName
       this.objTblUserRights.viewAccess = element.viewAccess;
       this.objTblUserRights.orgId = element.orgId;
       this.objTblUserRights.moduleId = element.moduleId;
@@ -268,7 +268,7 @@ export class UserAccessRightsComponent implements OnInit {
     })
     console.log(this.objTblUserRoleRightsArr);
     
-    
+    // return
     this.userAcessRightService.postUserAccessRightsDetails(this.objTblUserRoleRightsArr).subscribe((result: any) => {
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Permissions updated successfully' });
       this.objTblUserRoleRightsArr = [];
