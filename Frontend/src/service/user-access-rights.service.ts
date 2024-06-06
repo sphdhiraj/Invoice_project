@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Module, Organization, UserRole } from './Model/model';
+import { AccessRight, Module, Organization, UserRole } from './Model/model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +12,7 @@ export class UserAccessRightsService {
   private moduleApiUrl = 'http://localhost:9090/modules';
   private orgApiUrl = 'http://localhost:9090/organizations';
   private roleApiUrl = 'http://localhost:9090/user-roles';
+  private userAccessUrl = 'http://localhost:9090/access-rights'
 
   constructor(private http: HttpClient) { }
 
@@ -37,10 +38,19 @@ export class UserAccessRightsService {
     );
   }
 
-  getUserRolesByOrg(orgId: string): Observable<UserRole[]> {
-    //return this.http.get<UserRole[]>(`/api/user-roles`, { params: { orgId: orgId } });
-    // Provide orgId as a query parameter
-    const params = new HttpParams().set('orgId', orgId);
-    return this.http.get<UserRole[]>('/api/user-roles', { params });
+  // getUserRolesByOrg(orgId: string): Observable<UserRole[]> {
+  //   //return this.http.get<UserRole[]>(`/api/user-roles`, { params: { orgId: orgId } });
+  //   // Provide orgId as a query parameter
+  //   const params = new HttpParams().set('orgId', orgId);
+  //   return this.http.get<UserRole[]>(this.userAccessUrl, { params });
+  // }
+
+  getAccessRights(): Observable<AccessRight[]> {
+    return this.http.get<AccessRight[]>(this.userAccessUrl);
   }
+
+  getAccessRightsByOrgIdAndRoleId(orgId: string, roleId: string): Observable<AccessRight[]> {
+    const url = `${this.userAccessUrl}/${orgId}/${roleId}`;
+    return this.http.get<AccessRight[]>(url);
+}
 }

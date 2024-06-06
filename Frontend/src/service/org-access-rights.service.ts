@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { Module, Organization, UserRole } from './Model/model';
+import { Module, Organization } from './Model/model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,4 +32,5 @@ export class OrgAccessRightsService {
     return this.http.get<Module[]>(url);
   }
 
+  
 }
