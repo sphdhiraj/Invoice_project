@@ -262,9 +262,9 @@ export class UserAccessRightsComponent implements OnInit {
       this.objTblUserRights.roleId = element.roleId;
 
   
-      if (this.objTblUserRights.addAccess == true || this.objTblUserRights.editAccess == true || this.objTblUserRights.deleteAccess == true || this.objTblUserRights.cancelAccess == true || this.objTblUserRights.printAccess == true || this.objTblUserRights.viewAccess == true || this.objTblUserRights.approveAccess == true)
-          this.objTblUserRoleRightsArr.push(this.objTblUserRights);
-        
+      // if (this.objTblUserRights.addAccess == true || this.objTblUserRights.editAccess == true || this.objTblUserRights.deleteAccess == true || this.objTblUserRights.cancelAccess == true || this.objTblUserRights.printAccess == true || this.objTblUserRights.viewAccess == true || this.objTblUserRights.approveAccess == true)
+      //     this.objTblUserRoleRightsArr.push(this.objTblUserRights);
+      this.objTblUserRoleRightsArr.push(this.objTblUserRights);
     })
     console.log(this.objTblUserRoleRightsArr);
     

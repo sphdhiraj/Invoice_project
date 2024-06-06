@@ -48,8 +48,7 @@ export class OrganizationComponent implements OnInit {
         Validators.email
       ]),
       contactPersonPhone: new FormControl('', [
-        Validators.required,
-        Validators.pattern('^[0-9]{7,15}$') 
+        Validators.required, 
       ]),
       orgStatus: ['', Validators.required],
 

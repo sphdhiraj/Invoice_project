@@ -57,10 +57,10 @@ export class MenuComponent implements OnInit {
             ]
           },
           {
-            label: 'Organization', showmenu:true, icon: 'fa-solid fa-building-columns', routerLink: [""],
+            label: 'Organization', showmenu:this.ValidateParentModule('Organization'), icon: 'fa-solid fa-building-columns', routerLink: [""],
             items: [
               {
-                label: 'Invoice', icon: '',  visible:true, routerLink: ["/inbox"]
+                label: 'Invoice', icon: '',  visible:this.ValidateSubModule('Invoice','Organization'), routerLink: ["/inbox"]
               },
             ]
           },
@@ -90,12 +90,15 @@ export class MenuComponent implements OnInit {
 
 
   ValidateParentModule(moduleName:string){
-    const isParentmenuPresent = this.menuRights?.some((e:any) => e.ParentMenuName === moduleName);
+    const isParentmenuPresent = this.menuRights?.some((e:any) => e.moduleName === moduleName);
+    console.log(isParentmenuPresent);
     return isParentmenuPresent;
 }
 
 ValidateSubModule(submoduleName:string,moduleName:string){
-    const isSubmenuPresent = this.menuRights?.some((e:any) => e.ParentMenuName === moduleName && e.MenuName === submoduleName);
+    const isSubmenuPresent = this.menuRights?.some((e:any) => e.moduleName === moduleName && e.displayName === submoduleName);
+    console.log(isSubmenuPresent);
+    
     return isSubmenuPresent;
 }
 
