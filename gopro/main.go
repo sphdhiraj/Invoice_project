@@ -413,7 +413,6 @@ func (mgr *manager) GetModuleOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([
 		}
 		results = append(results, result)
 	}
-
 	return results, nil
 }
 

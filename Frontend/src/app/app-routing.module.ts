@@ -30,8 +30,15 @@ imports: [
           path: '', canActivate: [AuthGuard], component: LayoutComponent,
           children: [
               { path: 'inbox', loadChildren: () => import('./component/mailattachement/mailattachement.module').then(m => m.MailattachementModule) },
+              //{ path: 'organization', loadChildren: () => import('./component/organization/organization.module').then(m => m.OrganizationModule) },
+              //{ path: 'userrole', loadChildren: () => import('./component/userrole/userrole.module').then(m => m.UserroleModule) },
           ]
       },
+      { path: 'organizations', loadChildren: () => import('./component/organization/organization.module').then(m => m.OrganizationModule) },
+      { path: 'user-roles', loadChildren: () => import('./component/userrole/userrole.module').then(m => m.UserroleModule) },
+      { path: 'modules', loadChildren: () => import('./component/module-name/module-name.module').then(m => m.ModuleNameModule) },
+      { path: 'org-access-rights', loadChildren: () => import('./component/org-access-rights/org-access-rights.module').then(m => m.OrgAccessRightsModule) },
+      { path: 'user-access-rights', loadChildren: () => import('./component/user-access-rights/user-access-rights.module').then(m => m.UserAccessRightsModule) },
       { path: 'login',component:LoginComponent}, 
       { path: 'register',component:RegisterComponent}, 
       { path: 'forgot',component:ForgotpasswordComponent}, 

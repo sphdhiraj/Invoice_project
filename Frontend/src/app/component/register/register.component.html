@@ -3,20 +3,27 @@
 	<div class="d-flex justify-content-center h-100">
 		<div class="card1">
 			<div class="card-header">
-				<h3 class="mb-4">Sign Up</h3>
-				<div class="d-flex justify-content-end social_icon">
-					<span class="span"><i class="fab fa-facebook-square"></i></span>
-					<span class="span"><i class="fab fa-google-plus-square"></i></span>
-					<span class="span"><i class="fab fa-twitter-square"></i></span>
-				</div>
+				<h3 class="mb-4">User Registration</h3>
 			</div>
 			<div class="card-body mb-2">
-				<form [formGroup]="SignForm">
+				<form [formGroup]="SignForm" (ngSubmit)="signupForm()">
+					
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
+							<span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
 						</div>
-						<input type="text" class="form-control" placeholder="Username" formControlName="username">
+						
+                        <select class="form-control" name="orgId" formControlName="organizationID">
+							<option *ngFor="let org of organizations" [value]="org.orgId">{{ org.orgName }}</option>
+						  </select>
+						
+					</div>
+
+					<div class="input-group form-group mb-4">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+						</div>
+						<input type="text" class="form-control" placeholder="Username" formControlName="name">
 						
 					</div>
 					
@@ -26,9 +33,48 @@
 						</div>
 						<input type="password" class="form-control" placeholder="password" formControlName="password">
 					</div>
+
+					<div class="input-group form-group mb-4">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
+						</div>
+						<input type="text" class="form-control" placeholder="Email" formControlName="userEmail">
+						
+					</div>
+
+					<div class="input-group form-group mb-4">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+						</div>
+						<input type="text" class="form-control" placeholder="Phone Number" formControlName="userPhone">
+						
+					</div>
+
+					<div class="input-group form-group mb-4">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fa-solid fa-person-circle-question"></i></span>
+						</div>
+						
+                        <select class="form-control" formControlName="userStatus">
+							<option *ngFor="let sts of userStatus" [value]="sts.value">{{ sts.name }}</option>
+						  </select>
+						
+					</div>
+
+					<div class="input-group form-group mb-4">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fa-solid fa-address-book"></i></span>
+						</div>
+						
+                        <select class="form-control" formControlName="userRoleId">
+							<option *ngFor="let role of userRoles" [value]="role.roleId">{{ role.roleName }}</option>
+						  </select>
+						
+					</div>
+
 					
 					<div class="form-group text-right">
-						<button  class="btn  login_btn" (click)="signupForm()">Submit</button>
+						<button type="submit"  class="btn  login_btn" >Submit</button>
 					</div>
 				</form>
 			</div>
