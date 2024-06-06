@@ -29,7 +29,7 @@ export class Product {
     roleId!: string;
     roleName!: string;
     roleStatus!: string;
-    OrgID!: string;
+    orgId!: string;
   }
 
   export class Module {
@@ -59,3 +59,19 @@ export class Product {
     UserEmail!: string
     Password!: string
 }
+
+  export class AccessRight {
+    accessRightsId?: string;
+    roleId!: string;
+    orgId!: string;
+    moduleId!: string;
+    viewAccess!: boolean;
+    addAccess!: boolean;
+    editAccess!: boolean;
+    deleteAccess!: boolean;
+    printAccess!: boolean;
+    cancelAccess!: boolean;
+    approveAccess!:boolean;
+    allAccess!: boolean;
+    ModuleName!: string;
+  }

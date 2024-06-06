@@ -86,8 +86,6 @@ orgAccessForm!: FormGroup;
     const selectedOrgId = this.orgAccessForm.get('selectedOrgId')?.value.orgId;
     this.module_Details(selectedOrgId);
     this.showTable = true;
-
-    
   }
 
   submitPermissions() {
