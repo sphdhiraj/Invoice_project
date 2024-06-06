@@ -1,0 +1,12 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+mip/
+env.bak/
+venv.bak/
+Invoice_Folder/
+# pycache
+__pycache__/

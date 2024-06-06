@@ -4,6 +4,9 @@ watchdog
 PyMuPDF
 pandas
 fastapi
-PYJWT
-Pillow
+pillow 
 bcrypt
+PYJWT
+pdfplumber
+PyPDF2
+scikit-learn
