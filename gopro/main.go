@@ -167,6 +167,8 @@ type Manager interface {
 	GetModuleOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]gin.H, error)
 
 	GetAccessRightsByOrgIDAndRoleID(roleID, orgID primitive.ObjectID) ([]gin.H, error)
+
+	GetOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]OrgAccessRights, error)
 }
 
 func connectDb() {
@@ -407,6 +409,7 @@ func (mgr *manager) GetModuleOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([
 		result := gin.H{
 			"accessRightsId": ar.AccessRightsID.Hex(),
 			"moduleName":     module.ModuleName,
+			"displayName":    module.DisplayName,
 			"orgId":          ar.OrgID.Hex(),
 			"moduleId":       ar.ModuleID.Hex(),
 			"permission":     ar.Permission,
@@ -458,6 +461,13 @@ func loginUser(c *gin.Context) {
 		return
 	}
 
+	// Fetch organization access rights
+	orgAccessRights, err := Mgr.GetOrgAccessRightsByOrgID(user.OrganizationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch organization access rights"})
+		return
+	}
+
 	// Fetch module details for each access right and construct the response
 	var accessRightsResponse []gin.H
 	for _, ar := range accessRights {
@@ -482,6 +492,16 @@ func loginUser(c *gin.Context) {
 			"allAccess":      ar.AllAccess,
 		}
 		accessRightsResponse = append(accessRightsResponse, arResponse)
+	}
+
+	var orgAccessRightsResponse []gin.H
+	for _, oar := range orgAccessRights {
+		orgAccessRightsResponse = append(orgAccessRightsResponse, gin.H{
+			"orgAccessRightsId": oar.AccessRightsID.Hex(),
+			"orgId":             oar.OrgID.Hex(),
+			"moduleId":          oar.ModuleID.Hex(),
+			"permission":        oar.Permission,
+		})
 	}
 
 	// Construct the response
@@ -510,7 +530,8 @@ func loginUser(c *gin.Context) {
 			"smtpURL":            organization.SMTPURL,
 			"smtpUsername":       organization.SMTPUsername,
 		},
-		"AccessRights": accessRightsResponse,
+		"AccessRights":    accessRightsResponse,
+		"OrgAccessRights": orgAccessRightsResponse,
 	}
 
 	// Send the response
@@ -584,6 +605,40 @@ func (mgr *manager) GetAccessRightsByRoleIDandOrgId(roleID, orgID primitive.Obje
 
 	fmt.Println("Access rights fetched:", accessRights)
 	return accessRights, nil
+}
+
+// now
+func (mgr *manager) GetOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]OrgAccessRights, error) {
+	var orgAccessRights []OrgAccessRights
+	orgAccessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+
+	filter := bson.M{
+		"orgId": orgID,
+	}
+
+	cur, err := orgAccessRightsCollection.Find(mgr.ctx, filter)
+	if err != nil {
+		fmt.Println("Error finding organization access rights:", err)
+		return nil, err
+	}
+	defer cur.Close(mgr.ctx)
+
+	for cur.Next(mgr.ctx) {
+		var oar OrgAccessRights
+		err := cur.Decode(&oar)
+		if err != nil {
+			fmt.Println("Error decoding organization access rights:", err)
+			return nil, err
+		}
+		orgAccessRights = append(orgAccessRights, oar)
+	}
+	if err := cur.Err(); err != nil {
+		fmt.Println("Cursor error:", err)
+		return nil, err
+	}
+
+	fmt.Println("Organization access rights fetched:", orgAccessRights)
+	return orgAccessRights, nil
 }
 
 // /organisaton//
