@@ -1,26 +1,27 @@
 <!-- <p-toast></p-toast> -->
 <div class="container body">
 	<div class="d-flex justify-content-center h-100">
-		<div class="card1">
+		<div class="card">
 			<div class="card-header">
 				<h3 class="mb-4">Organization</h3>
-				<!-- <div class="d-flex justify-content-end social_icon">
-					<span class="span"><i class="fab fa-facebook-square"></i></span>
-					<span class="span"><i class="fab fa-google-plus-square"></i></span>
-					<span class="span"><i class="fab fa-twitter-square"></i></span>
-				</div> -->
+				
 			</div>
 			<div class="card-body mb-2">
 				<form [formGroup]="OrgForm" >
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-industry"></i></span>
+                  <div class="row">
+					  <div class="col-md-3 mb-2">
+						<div class="input-group form-group mb-4">
+							<div class="input-group-prepend">
+								<span class="input-group-text"><i class="fa-solid fa-industry"></i></span>
+							</div>
+							<input type="text" class="form-control" placeholder="Organization Name" formControlName="orgName">
+							<div *ngIf="OrgForm.get('orgName')?.invalid && OrgForm.get('orgName')?.touched">
+								<div *ngIf="OrgForm.get('orgName')?.errors?.['required']">Organization name is required.</div>
+							  </div>
 						</div>
-						<input type="text" class="form-control" placeholder="Organization Name" formControlName="orgName">
-						<div *ngIf="OrgForm.get('orgName')?.invalid && OrgForm.get('orgName')?.touched">
-                            <div *ngIf="OrgForm.get('orgName')?.errors?.['required']">Organization name is required.</div>
-                          </div>
-					</div>
+					  </div>
+				 
+					<div class="col-md-3 mb-2">
                     <div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
@@ -30,18 +31,8 @@
                             <div *ngIf="OrgForm.get('orgCode')?.errors?.['required']">Organization code is required.</div>
                           </div>
 					</div>
-					
-					<!-- <div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
-						</div>
-						<input type="text" class="form-control" placeholder="Organization Email" formControlName="org_email">
-						<div *ngIf="OrgForm.get('org_email')?.invalid && OrgForm.get('org_email')?.touched">
-                            <div *ngIf="OrgForm.get('org_email')?.errors?.['required']">Email is required.</div>
-                            <div *ngIf="OrgForm.get('org_email')?.errors?.['email']">Invalid email address.</div>
-                          </div>
-					</div> -->
-
+				   </div>
+				   <div class="col-md-3 mb-2">
                     <div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
@@ -51,7 +42,8 @@
                             <div *ngIf="OrgForm.get('contact_person')?.errors?.['required']">Contact person is required.</div>
                         </div>
 					</div>
-
+                    </div>
+					<div class="col-md-3 mb-2">
                     <div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -62,7 +54,8 @@
                             <div *ngIf="OrgForm.get('contactPersonEmail')?.errors?.['email']">Invalid email address.</div>
                         </div>
 					</div>
-
+				   </div>
+				   <div class="col-md-3 mb-2">
                     <div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
@@ -73,20 +66,8 @@
                             <div *ngIf="OrgForm.get('contactPersonPhone')?.errors?.['pattern']">Invalid phone number format.</div>
                         </div>
 					</div>
-
-                    <!-- <div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
-						</div>
-						
-                        <select class="form-control" aria-placeholder="Status" formcontrolname="status">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-						<div *ngIf="OrgForm.get('status')?.invalid && OrgForm.get('status')?.touched" class="text-danger">
-                            <div *ngIf="OrgForm.get('status')?.errors?.['required']">Status is required.</div>
-                        </div>
-					</div> -->
+                     </div>
+					 <div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-person-circle-question"></i></span>
@@ -97,7 +78,8 @@
 						  </select>
 						
 					</div>
-
+					</div>
+					<div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -108,7 +90,8 @@
                             <div *ngIf="OrgForm.get('invoiceEmail')?.errors?.['email']">Invalid email address.</div>
                         </div>
 					</div>
-
+				   </div>
+			       <div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
@@ -118,7 +101,8 @@
                             <div *ngIf="OrgForm.get('SMTPusername')?.errors?.['required']">Username is required.</div>
                           </div>
 					</div>
-
+				    </div>
+					<div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fas fa-key"></i></span>
@@ -128,7 +112,8 @@
                             <div *ngIf="OrgForm.get('SMTPpassword')?.errors?.['required']">Password is required.</div>
                           </div>
 					</div>
-
+                     </div>
+					 <div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-link"></i></span>
@@ -138,7 +123,8 @@
                             <div *ngIf="OrgForm.get('SMTPurl')?.errors?.['required']">Url is required.</div>
                           </div>
 					</div>
-
+                      </div>
+					  <div class="col-md-3 mb-2">
 					<div class="input-group form-group mb-4">
 						<div class="input-group-prepend">
 							<span class="input-group-text"><i class="fa-solid fa-anchor"></i></span>
@@ -148,18 +134,15 @@
                             <div *ngIf="OrgForm.get('SMTPport')?.errors?.['required']">Port is required.</div>
                           </div>
 					</div>
-					
+					 </div>
 					<div class="form-group text-right">
-						<button type="submit" class="btn  login_btn" (click)="org_Form()">Submit</button>
+						<button type="submit" class="btn  login_btn"(click)="org_Form()">Submit</button>
 					</div>
+			</div>
+
 				</form>
 			</div>
-			<!-- <div class="card-footer">
-				<div class="d-flex justify-content-center content">
-					Do you have an account?<a [routerLink]="['/login']" class="tb">login</a>
-				</div>
-				
-			</div> -->
+		
 		</div>
 	</div>
 </div>

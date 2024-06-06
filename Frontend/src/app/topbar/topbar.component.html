@@ -9,14 +9,14 @@
           </a>
         </span>
         <nav>
-          <ul>
-            <li><a routerLink="/inbox">Inbox<span class="count">{{count}}</span></a>
-             
+          <ul class="topbar_item">
+            <li><a routerLink="/inbox">INBOX </a>
             </li>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Pricing</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><span class="count">{{count}}</span></li>
+            <li><a href="#">HOME</a></li>
+            <li><a href="#">ABOUT</a></li>
+            <li><a href="/" (click)="refresh()">REFRESH</a></li>
+            <li><a href="#">CONTACT</a></li>
           </ul>
         </nav>
         </header>

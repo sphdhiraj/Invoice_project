@@ -18,7 +18,7 @@ import { ApiService } from 'src/service/api.service';
 `]
 })
 export class MailattachementComponent implements OnInit {
-
+  id:any
   urls='http://localhost:8585'
   formData!:FormGroup;
   constructor(private apiservice :ApiService, private sanitizer: DomSanitizer,
@@ -33,13 +33,17 @@ export class MailattachementComponent implements OnInit {
   emailsfile: string[] = [];
   safeUrls: SafeResourceUrl[] = [];
   displayUrls: string[] = [];
-
+  userData:any
 
   // Output the constructed URL
   ngOnInit(): void {
-    this.getEmails();
-    this.getUploadFile()
     this.formsetup()
+    this.userData = localStorage.getItem('org')
+    let data = JSON.parse(this.userData);
+    let orgId = data.orgId;
+    this.getEmails(orgId);
+    console.log(orgId)
+    this.id = orgId
   }
  
   formsetup(){
@@ -51,31 +55,28 @@ export class MailattachementComponent implements OnInit {
 
 result:any
 imageurls:any
-  submit(){
-    if (this.formData.get('optionselected')?.value) {
-      // console.log(this.formData.get('optionselected')?.value)
-      this.apiservice.sendFile(this.formData.get('optionselected')?.value).subscribe(
-    (response:any) => {
-      this.jsonData = response[0];
-      console.log('json',this.jsonData)
-      const dataWithoutId = this.jsonData.map((ele: any) => {
-        const { id, ...rest } = ele;
-        return rest; 
-      });
-      this.postData(dataWithoutId)
-      // console.log('d',dataWithoutId)
-      this.imageurls = this.sanitizer.bypassSecurityTrustResourceUrl(this.urls + response[1][0]);
-      console.log(this.imageurls);
+submit(){
+  if (this.formData.get('optionselected')?.value) {
+    this.apiservice.sendFile(this.formData.get('optionselected')?.value, this.id).subscribe(
+  (response:any) => {
+    this.jsonData = response[0];
+    console.log('json',response)
+    const dataWithoutId = this.jsonData.map((ele: any) => {
+      const { id, ...rest } = ele;
+      return rest; 
+    });
+    this.postData(dataWithoutId)
+    this.imageurls = this.sanitizer.bypassSecurityTrustResourceUrl(this.urls + response[1][0]);
+    console.log(this.imageurls);
 
-      this.messageService.add({severity:'success', summary: 'Success', detail:'Submitted Succesfully'});
-    },
-    (error:any) => {
-      console.error(error);
-    }
-  );
- }
+    this.messageService.add({severity:'success', summary: 'Success', detail:'Submitted Succesfully'});
+  },
+  (error:any) => {
+    console.error(error);
   }
-
+);
+}
+}
 
   downloadJson() {
     const jsonDataWithoutId = JSON.parse(JSON.stringify(this.jsonData));
@@ -103,24 +104,14 @@ imageurls:any
       console.error('Error while posting data:', error);
     });
   }
-
   emails :any;
-  getEmails(): void {
-      this.apiservice.getEmails()
+  getEmails(id:any): void {
+      this.apiservice.getEmails(id)
       .subscribe(response => {
         this.emails = response.emails;
         console.log('this.emails',response.emails)
       });
   }
-
-
-
-  getUploadFile(): void {
-    this.apiservice.getFile().subscribe(response => {
-      this.emailsfile = response;
-    });
-  }
-
 
 // Function to handle row deselection
 clonedProducts:any = [];
@@ -189,7 +180,7 @@ downlodcsv(){
  
   if (this.formData.get('optionselected')?.value) {
     console.log(this.formData.get('optionselected')?.value)
-    this.apiservice.sendForRemoveFile(this.formData.get('optionselected')?.value).subscribe(
+    this.apiservice.sendForRemoveFile(this.formData.get('optionselected')?.value,this.id).subscribe(
   (response:any) => {
     window.location.reload()
   },

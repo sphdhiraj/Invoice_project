@@ -12,23 +12,22 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   
-
-  getEmails(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/emails`);
+  getEmails(data:any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/emails/${data}`);
   }
  
-  getFile(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/folder`);
-  }
-  sendFile(text: string): Observable<any> {
+  // getFile(): Observable<any> {
+  //   return this.http.get<any>(`${this.apiUrl}/folder`);
+  // }
+  sendFile(text: string,id:string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const body = { raw_text: text };
+    const body = { raw_text: text ,id:id};
     return this.http.post<any>(`${this.apiUrl}/filecontent`, body, { headers });
   }
   // removefile
-  sendForRemoveFile(text: string): Observable<any> {
+  sendForRemoveFile(text: string,id:string): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const body = { raw_text: text };
+    const body = { raw_text: text ,id:id};
     return this.http.post<any>(`${this.apiUrl}/removefile`, body, { headers });
   }
 
@@ -37,5 +36,4 @@ export class ApiService {
     // const body = { json: data };
     return this.http.post<any>(`${this.apiUrl}/uploadjson`, data, { headers });
   }
-
 }

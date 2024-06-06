@@ -3,13 +3,18 @@ import { CommonModule } from '@angular/common';
 
 import { SidebarRoutingModule } from './sidebar-routing.module';
 import { SidebarComponent } from './sidebar.component';
+import { MenuModule } from '../component/menu/menu.module';
+import { MenuitemComponent } from '../component/menuitem/menuitem.component';
+import { MenuComponent } from '../component/menu/menu.component';
 
 
 @NgModule({
-  declarations: [],
+  declarations: [
+  
+  ],
   imports: [
     CommonModule,
-    SidebarRoutingModule
+    SidebarRoutingModule,
   ]
 })
 export class SidebarModule { }

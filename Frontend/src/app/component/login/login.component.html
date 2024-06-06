@@ -1,14 +1,10 @@
 <p-toast></p-toast>
 <div class="container body">
 	<div class="d-flex justify-content-center h-100">
-		<div class="card1">
+		<div class="card1 mt-6 w-50">
 			<div class="card-header">
-				<h3 class="mb-4">Sign In</h3>
-				<!-- <div class="d-flex justify-content-end social_icon">
-					<span class="span"><i class="fab fa-facebook-square"></i></span>
-					<span class="span"><i class="fab fa-google-plus-square"></i></span>
-					<span class="span"><i class="fab fa-twitter-square"></i></span>
-				</div> -->
+				<h3 class="mb-4 text-center mt-4">Sign In</h3>
+				
 			</div>
 			<div class="card-body mb-2">
 				<form [formGroup]="loginForm">
@@ -27,7 +23,7 @@
 					</div>
 					
 					<div class="form-group text-right">
-						<button  class="btn  login_btn"(click)="loginform()">Submit</button>
+						<button  class="btn btn-primary"(click)="loginform()">Submit</button>
 					</div>
 				</form>
 			</div>

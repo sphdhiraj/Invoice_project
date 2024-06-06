@@ -77,24 +77,7 @@ export class OrganizationComponent implements OnInit {
   }
   
 
-  // org_Form() {
-    
-  //   this.organizationDetails.org_name = this.OrgForm.get('org_name')?.value;
-  //   this.organizationDetails.org_code = this.OrgForm.get('org_code')?.value;
-  //   this.organizationDetails.org_email = this.OrgForm.get('org_email')?.value;
-  //   this.organizationDetails.contact_person = this.OrgForm.get('contact_person')?.value;
-  //   this.organizationDetails.contact_person_email = this.OrgForm.get('contact_person_email')?.value;
-  //   this.organizationDetails.contact_person_phone = this.OrgForm.get('contact_person_phone')?.value;
-  //   this.organizationDetails.status = this.OrgForm.get('status')?.value;
-
-  //   this.apiservice.getOrgDetails(this.organizationDetails).subscribe((response:any) => {
-  //         console.log('Success!', response);
-  //         this.messageservice.add({severity:'success', summary: 'Success', detail:'Added Successfully'});
-  //       }, (error:any) => {
-  //         console.error('Error!', error);
-  //         this.messageservice.add({severity:'error', summary: 'Error', detail:'organization already exist'});
-  //       });
-  // }
+ 
 
   org_Form() {
     if (this.OrgForm.invalid) {

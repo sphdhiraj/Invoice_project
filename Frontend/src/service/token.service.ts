@@ -20,7 +20,10 @@ export class TokenService {
     return true;
   }
 
-  
+  getOrgInfo(){
+    console.log('org',localStorage.getItem('org'))
+    return localStorage.getItem('org') 
+  }
   logout(): void {
     this.clear();
     this.router.navigate(['/login']);

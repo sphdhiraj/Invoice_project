@@ -40,3 +40,22 @@ export class Product {
     permission?: boolean;
     accessRightsId?: string | null;
   }
+  export class AccountModel{
+    contactPerson!:string;
+    contactPersonEmail!:string;
+    contactPersonPhone!:string;
+    invoiceEmail!:string;
+    orgCode!:string;
+    orgId!:string;
+    orgName!:string;
+    orgStatus!:string;
+    smtpPassword!:string;
+    smtpPort!:string;
+    smtpURL!:string;
+    smtpUsername!:string;
+  }
+
+  export class LoginDetail{
+    UserEmail!: string
+    Password!: string
+}

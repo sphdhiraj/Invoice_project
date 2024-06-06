@@ -37,6 +37,8 @@ import { ModuleNameComponent } from './component/module-name/module-name.compone
 import { OrgAccessRightsComponent } from './component/org-access-rights/org-access-rights.component';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
+import { MenuComponent } from './component/menu/menu.component';
+import { MenuitemComponent } from './component/menuitem/menuitem.component';
 //import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
 //import { NgSelectModule } from '@ng-select/ng-select';
 
@@ -50,12 +52,14 @@ import { UserAccessRightsComponent } from './component/user-access-rights/user-a
     // MailattachementComponent,
     LoginComponent,
     ForgotpasswordComponent,
-    RegisterComponent,
-    UserroleComponent,
-    OrganizationComponent,
-    ModuleNameComponent,
-    OrgAccessRightsComponent,
-    UserAccessRightsComponent,
+    // MenuComponent,
+    // MenuitemComponent,
+    // RegisterComponent,
+    // UserroleComponent,
+    // OrganizationComponent,
+    // ModuleNameComponent,
+    // OrgAccessRightsComponent,
+    // UserAccessRightsComponent,
     // LayoutComponent,
   
   ],

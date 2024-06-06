@@ -23,12 +23,16 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FieldsetModule } from 'primeng/fieldset';
 import { AccordionModule } from 'primeng/accordion';
 import { LayoutComponent } from './layout.component';
+import { MenuitemComponent } from '../menuitem/menuitem.component';
+import { MenuComponent } from '../menu/menu.component';
 
 @NgModule({
   declarations: [
     SidebarComponent,
     TopbarComponent,
-    LayoutComponent
+    LayoutComponent,
+    MenuitemComponent,
+    MenuComponent
   ],
   imports: [
     CommonModule,
