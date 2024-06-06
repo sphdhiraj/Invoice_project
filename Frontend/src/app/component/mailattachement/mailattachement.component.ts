@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { Product, SelectedProduct } from 'src/service/Model/model';
 // import { AlertifyService } from 'src/service/alertify.service';
 import { ApiService } from 'src/service/api.service';
+import { LoginService } from 'src/service/login.service';
 
 @Component({
   selector: 'app-mailattachement',
@@ -21,8 +22,9 @@ export class MailattachementComponent implements OnInit {
   id:any
   urls='http://localhost:8585'
   formData!:FormGroup;
+  userRights: any;
   constructor(private apiservice :ApiService, private sanitizer: DomSanitizer,
-     private messageService: MessageService
+     private messageService: MessageService, private loginservice:LoginService
   ) {
    
    }
@@ -33,7 +35,10 @@ export class MailattachementComponent implements OnInit {
   emailsfile: string[] = [];
   safeUrls: SafeResourceUrl[] = [];
   displayUrls: string[] = [];
-  userData:any
+  userData:any;
+
+  menuRights:any = [];
+  menuRightsListfetched:any;
 
   // Output the constructed URL
   ngOnInit(): void {
@@ -44,6 +49,11 @@ export class MailattachementComponent implements OnInit {
     this.getEmails(orgId);
     console.log(orgId)
     this.id = orgId
+
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+     this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+     console.log(this.userRights);
   }
  
   formsetup(){
