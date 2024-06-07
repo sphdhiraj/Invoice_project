@@ -20,6 +20,9 @@ export class OrganizationComponent implements OnInit {
     { value: 'Active', name: 'Active' },
     { value: 'Inactive', name: 'Inactive' }
   ];
+  menuRights:any = [];
+  menuRightsListfetched:any;
+  userRights: any;
 
   constructor(private loginservice:LoginService,private messageservice:MessageService,private organizationService :OrganizationsService,
     private router: Router
@@ -27,6 +30,11 @@ export class OrganizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.formsetup();
+
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+     console.log(this.userRights);
   }
 
   formsetup() {

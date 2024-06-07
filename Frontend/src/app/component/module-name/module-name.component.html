@@ -8,7 +8,7 @@
                         <h3>Module</h3>
 					</div>
 					<div class="col-md-6 text-right">
-						<button type="submit" class="btnchat"(click)="module_Form()">Submit</button>
+						<button type="submit" class="btnchat"(click)="module_Form()" *ngIf="userRights[0].addAccess">Submit</button>
 					</div>
 				</div>
 			</div>

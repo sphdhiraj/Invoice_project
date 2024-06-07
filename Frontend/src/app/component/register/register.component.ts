@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Organization, UserRole } from 'src/service/Model/model';
+import { LoginService } from 'src/service/login.service';
 import { RegisterService } from 'src/service/register.service';
 
 @Component({
@@ -13,18 +14,28 @@ export class RegisterComponent implements OnInit {
   SignForm!:FormGroup;
   organizations: Organization[] = [];
   userRoles: UserRole[] = [];
+  menuRights:any = [];
+  menuRightsListfetched:any;
+  userRights: any;
 
   userStatus= [
     { value: 'Active', name: 'Active' },
     { value: 'Inactive', name: 'Inactive' }
   ];
 
-  constructor(private registerservice:RegisterService,private messageservice:MessageService) { }
+  constructor(private registerservice:RegisterService,private messageservice:MessageService,
+    private loginservice: LoginService
+  ) { }
 
   ngOnInit(): void {
     this.formsetup();
     this.org_Details();
     this.role_Details();
+
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+     console.log(this.userRights);
   }
 
   formsetup() {

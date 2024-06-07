@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Organization, UserRole } from 'src/service/Model/model';
+import { LoginService } from 'src/service/login.service';
 import { UserroleService } from 'src/service/userrole.service';
 
 @Component({
@@ -18,11 +19,22 @@ export class UserroleComponent implements OnInit {
     { value: 'Active', name: 'Active' },
     { value: 'Inactive', name: 'Inactive' }
   ];
-  constructor(private userroleService: UserroleService,private messageservice:MessageService) { }
+  menuRights:any = [];
+  menuRightsListfetched:any;
+  userRights: any;
+
+  constructor(private userroleService: UserroleService,private messageservice:MessageService,
+    private loginservice: LoginService
+  ) { }
 
   ngOnInit(): void {
     this.formsetup();
     this.org_Details();
+
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+     console.log(this.userRights);
   }
 
   formsetup() {

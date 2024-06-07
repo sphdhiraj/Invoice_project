@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MessageService } from 'primeng/api';
 import { TableCheckbox } from 'primeng/table';
 import { AccessRight, Module, Organization, UserRole } from 'src/service/Model/model';
+import { LoginService } from 'src/service/login.service';
 import { UserAccessRightsService } from 'src/service/user-access-rights.service';
 
 
@@ -36,10 +37,13 @@ export class UserAccessRightsComponent implements OnInit {
   rights: any;
   parsedArray: any;
   userRights: any;
+  menuRights:any = [];
+  menuRightsListfetched:any;
+
   constructor(
     private userAcessRightService: UserAccessRightsService,
     private messageService: MessageService,private fb: FormBuilder,
-    private cdr: ChangeDetectorRef) {
+    private cdr: ChangeDetectorRef, private loginservice: LoginService) {
     this.isRowSelectable = this.isRowSelectable?.bind(this);
    
   }
@@ -56,7 +60,10 @@ export class UserAccessRightsComponent implements OnInit {
             selectedOrgId: [''],
             selectedRoleId: ['']
           });
- 
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+    console.log(this.userRights);
   }
   formsetup() {
     this.userAccessForm = this.fb.group({

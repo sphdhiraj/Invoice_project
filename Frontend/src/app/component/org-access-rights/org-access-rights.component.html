@@ -9,11 +9,12 @@
               <h3 class="">Organization Access Rights</h3>
             </div>
             <div class="col-md-4 text-right">
-               <button type="submit" class="btnchat mr-2"(click)="searchModules()">Search</button>
+               <button type="submit" class="btnchat mr-2"(click)="searchModules()" *ngIf="userRights[0].addAccess">Search</button>
                <button
                   type="button"
                   (click)="submitPermissions()"
                   class="btnchat"
+                  *ngIf="userRights[0].addAccess"
                 >
                   Submit
                 </button>
