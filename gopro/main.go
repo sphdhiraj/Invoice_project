@@ -763,60 +763,71 @@ func updateOrganization(c *gin.Context) {
 //interface organisation
 
 func (mgr *manager) Insert(data interface{}) (primitive.ObjectID, error) {
-	// Insert the organization document
 	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
 	result, err := orgCollection.InsertOne(context.TODO(), data)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
-
-	// Retrieve the orgID of the inserted document
 	orgID := result.InsertedID.(primitive.ObjectID)
-	fmt.Println("Inserted organization ID:", orgID)
-
-	// Fetch all module IDs from the modules collection
-	moduleCollection := mgr.connection.Database("Invoicedatabase").Collection("modules")
-	cursor, err := moduleCollection.Find(context.TODO(), map[string]interface{}{})
-	if err != nil {
-		return primitive.NilObjectID, err
-	}
-	defer cursor.Close(context.TODO())
-
-	var modules []primitive.ObjectID
-	for cursor.Next(context.TODO()) {
-		var module struct {
-			ID primitive.ObjectID `bson:"_id"`
-		}
-		if err := cursor.Decode(&module); err != nil {
-			return primitive.NilObjectID, err
-		}
-		modules = append(modules, module.ID)
-	}
-
-	if err := cursor.Err(); err != nil {
-		return primitive.NilObjectID, err
-	}
-
-	// Prepare OrgAccessRights documents with each moduleID and permission set to false
-	orgAccessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
-	var orgAccessRightsDocs []interface{}
-	for _, moduleID := range modules {
-		orgAccessRightsDoc := map[string]interface{}{
-			"orgId":      orgID,
-			"moduleId":   moduleID,
-			"permission": false,
-		}
-		orgAccessRightsDocs = append(orgAccessRightsDocs, orgAccessRightsDoc)
-	}
-
-	// Insert OrgAccessRights documents
-	_, err = orgAccessRightsCollection.InsertMany(context.TODO(), orgAccessRightsDocs)
-	if err != nil {
-		return primitive.NilObjectID, err
-	}
-
+	fmt.Println(orgID)
 	return orgID, nil
 }
+
+// func (mgr *manager) Insert(data interface{}) (primitive.ObjectID, error) {
+// 	// Insert the organization document
+// 	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
+// 	result, err := orgCollection.InsertOne(context.TODO(), data)
+// 	if err != nil {
+// 		return primitive.NilObjectID, err
+// 	}
+
+// 	// Retrieve the orgID of the inserted document
+// 	orgID := result.InsertedID.(primitive.ObjectID)
+// 	fmt.Println("Inserted organization ID:", orgID)
+
+// 	// Fetch all module IDs from the modules collection
+// 	moduleCollection := mgr.connection.Database("Invoicedatabase").Collection("modules")
+// 	cursor, err := moduleCollection.Find(context.TODO(), map[string]interface{}{})
+// 	if err != nil {
+// 		return primitive.NilObjectID, err
+// 	}
+// 	defer cursor.Close(context.TODO())
+
+// 	var modules []primitive.ObjectID
+// 	for cursor.Next(context.TODO()) {
+// 		var module struct {
+// 			ID primitive.ObjectID `bson:"_id"`
+// 		}
+// 		if err := cursor.Decode(&module); err != nil {
+// 			return primitive.NilObjectID, err
+// 		}
+// 		modules = append(modules, module.ID)
+// 	}
+
+// 	if err := cursor.Err(); err != nil {
+// 		return primitive.NilObjectID, err
+// 	}
+
+// 	// Prepare OrgAccessRights documents with each moduleID and permission set to false
+// 	orgAccessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+// 	var orgAccessRightsDocs []interface{}
+// 	for _, moduleID := range modules {
+// 		orgAccessRightsDoc := map[string]interface{}{
+// 			"orgId":      orgID,
+// 			"moduleId":   moduleID,
+// 			"permission": false,
+// 		}
+// 		orgAccessRightsDocs = append(orgAccessRightsDocs, orgAccessRightsDoc)
+// 	}
+
+// 	// Insert OrgAccessRights documents
+// 	_, err = orgAccessRightsCollection.InsertMany(context.TODO(), orgAccessRightsDocs)
+// 	if err != nil {
+// 		return primitive.NilObjectID, err
+// 	}
+
+// 	return orgID, nil
+// }
 
 func (mgr *manager) GetAll() ([]Organization, error) {
 	var data []Organization
@@ -1456,13 +1467,69 @@ func updateModule(c *gin.Context) {
 
 //interface module
 
+// func (mgr *manager) InsertModule(data interface{}) error {
+// 	collection := mgr.connection.Database("Invoicedatabase").Collection("modules")
+// 	result, err := collection.InsertOne(context.TODO(), data)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	fmt.Println(result.InsertedID)
+// 	return nil
+// }
+
 func (mgr *manager) InsertModule(data interface{}) error {
-	collection := mgr.connection.Database("Invoicedatabase").Collection("modules")
-	result, err := collection.InsertOne(context.TODO(), data)
+	// Insert the new module document
+	moduleCollection := mgr.connection.Database("Invoicedatabase").Collection("modules")
+	result, err := moduleCollection.InsertOne(context.TODO(), data)
 	if err != nil {
 		return err
 	}
-	fmt.Println(result.InsertedID)
+
+	// Retrieve the moduleID of the inserted document
+	moduleID := result.InsertedID.(primitive.ObjectID)
+	fmt.Println("Inserted module ID:", moduleID)
+
+	// Retrieve all organization IDs from the organizations collection
+	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
+	cursor, err := orgCollection.Find(context.TODO(), bson.M{})
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(context.TODO())
+
+	var orgIDs []primitive.ObjectID
+	for cursor.Next(context.TODO()) {
+		var org struct {
+			ID primitive.ObjectID `bson:"_id"`
+		}
+		if err := cursor.Decode(&org); err != nil {
+			return err
+		}
+		orgIDs = append(orgIDs, org.ID)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return err
+	}
+
+	// Prepare OrgAccessRights documents with each orgID and moduleID, and permission set to false
+	orgAccessRightsCollection := mgr.connection.Database("Invoicedatabase").Collection("orgAccessRights")
+	var orgAccessRightsDocs []interface{}
+	for _, orgID := range orgIDs {
+		orgAccessRightsDoc := map[string]interface{}{
+			"orgId":      orgID,
+			"moduleId":   moduleID,
+			"permission": false,
+		}
+		orgAccessRightsDocs = append(orgAccessRightsDocs, orgAccessRightsDoc)
+	}
+
+	// Insert OrgAccessRights documents
+	_, err = orgAccessRightsCollection.InsertMany(context.TODO(), orgAccessRightsDocs)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
