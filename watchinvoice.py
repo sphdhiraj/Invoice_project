@@ -33,68 +33,68 @@ credential=[]
 
 
 
-def getjson(file_path):
-    _, file_extension = os.path.splitext(file_path)
-    file_extension = file_extension
-    file_name = os.path.basename(file_path)
-    if file_extension == '.pdf':
-        mime_type = 'application/pdf'
+# def getjson(file_path):
+#     _, file_extension = os.path.splitext(file_path)
+#     file_extension = file_extension
+#     file_name = os.path.basename(file_path)
+#     if file_extension == '.pdf':
+#         mime_type = 'application/pdf'
    
-    else:
-        raise ValueError("Unsupported file type")
-    opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
-    client = documentai.DocumentProcessorServiceClient(client_options=opts)
-    with open(file_path, "rb") as file:
-        content = file.read()
-    request = {
-        "name": invoice_parser,
-        "raw_document": {
-            "content": content,
-            "mime_type": mime_type
-        },
-    }
+#     else:
+#         raise ValueError("Unsupported file type")
+#     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
+#     client = documentai.DocumentProcessorServiceClient(client_options=opts)
+#     with open(file_path, "rb") as file:
+#         content = file.read()
+#     request = {
+#         "name": invoice_parser,
+#         "raw_document": {
+#             "content": content,
+#             "mime_type": mime_type
+#         },
+#     }
 
   
-    result = client.process_document(request=request)
-    res = result.document.entities
-    return res
+#     result = client.process_document(request=request)
+#     res = result.document.entities
+#     return res
 
-known_formats = {}
-format_counter = 0
+# known_formats = {}
+# format_counter = 0
 
-def extract_layout_signature(pdf_path):
-    with pdfplumber.open(pdf_path) as pdf:
-        features = []
+# def extract_layout_signature(pdf_path):
+#     with pdfplumber.open(pdf_path) as pdf:
+#         features = []
         
-        for page in pdf.pages:
-            for char in page.chars:
-                if char['size'] > 12: 
-                    features.append((char['size'], char['doctop'], char['x0'], char['x1']))
-            for rect in page.rects:
-                features.append((rect['x0'], rect['top'], rect['x1'], rect['bottom']))
-        features.sort()
-        features_str = ','.join(map(str, features))
-    return hashlib.sha256(features_str.encode('utf-8')).hexdigest()
+#         for page in pdf.pages:
+#             for char in page.chars:
+#                 if char['size'] > 12: 
+#                     features.append((char['size'], char['doctop'], char['x0'], char['x1']))
+#             for rect in page.rects:
+#                 features.append((rect['x0'], rect['top'], rect['x1'], rect['bottom']))
+#         features.sort()
+#         features_str = ','.join(map(str, features))
+#     return hashlib.sha256(features_str.encode('utf-8')).hexdigest()
 
-def get_format_identifiers(pdf_path):
-    global format_counter
-    layout_signature = extract_layout_signature(pdf_path)
+# def get_format_identifiers(pdf_path):
+#     global format_counter
+#     layout_signature = extract_layout_signature(pdf_path)
     
-    if layout_signature in known_formats:
-        return known_formats[layout_signature]
-    else:
-        format_id = f"format_{format_counter}"
-        known_formats[layout_signature] = format_id
-        format_counter += 1
-        return format_id
+#     if layout_signature in known_formats:
+#         return known_formats[layout_signature]
+#     else:
+#         format_id = f"format_{format_counter}"
+#         known_formats[layout_signature] = format_id
+#         format_counter += 1
+#         return format_id
 
-def process_pdf(file_path):
+def process_pdf(file_path,orgId):
     mongo_client = pymongo.MongoClient("mongodb+srv://Root:Root@invoicedatabase.gicc9wm.mongodb.net/")
    
     db = mongo_client["Invoicedatabase"]
     collection = db["Invoice_Table"]
-    colections = db["pdf_format_tbl"]
-    format_id = get_format_identifiers(file_path)
+    # colections = db["pdf_format_tbl"]
+    # format_id = get_format_identifiers(file_path)
     _, file_extension = os.path.splitext(file_path)
     file_extension = file_extension
     file_name = os.path.basename(file_path)
@@ -104,17 +104,23 @@ def process_pdf(file_path):
     else:
         raise ValueError("Unsupported file type")
     
-    matching_format_id = collection.find_one({"format_id": format_id})
-    if matching_format_id :
-            colections.insert_one({
-            "format_id": format_id,
-            "pdf_name": file_name,
+    # for mistral
+    # matching_format_id = collection.find_one({"format_id": format_id})
+    # if matching_format_id :
+    #         colections.insert_one({
+    #         "format_id": format_id,
+    #         "pdf_name": file_name,
         
-            })
-            print(f"Document with format_id {format_id} already processed.")
-            return 
+    #         })
+    #         print(f"Document with format_id {format_id} already processed.")
+    #         return 
+    # print(orgId)
+    file_upNmae= (os.path.basename(file_path))
+    # print('file_upNmae',file_upNmae)
+    newFileName = f"{orgId}/{file_upNmae}"
+    # print('newFileName',newFileName)
 
-
+    # return 
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
     client = documentai.DocumentProcessorServiceClient(client_options=opts)
     with open(file_path, "rb") as file:
@@ -139,8 +145,7 @@ def process_pdf(file_path):
             extracted_entity = {
                         "type": entity.type_,
                         "mention_text": entity.mention_text,
-                        "name":file_name,
-                        "format_id":format_id
+                        "name":newFileName,
                     }
             entities.append(extracted_entity)
                     
@@ -151,8 +156,7 @@ def process_pdf(file_path):
                         extracted_entity = {
                             "type": prop.type_,
                             "mention_text": prop.mention_text,
-                            "name":file_name,
-                            "format_id":format_id
+                            "name":newFileName,
                        }
                         categories.append(extracted_entity)
     line_items = []         
@@ -179,8 +183,12 @@ def move_file(src, dest):
         base_filename, _ = os.path.splitext(os.path.basename(src))
         current_datetime = time.strftime("%Y-%m-%d-%H%M%S")
         new_filename = f"{base_filename}_{current_datetime}.pdf"
-        shutil.move(src, os.path.join(dest, new_filename))
-        logger.info(f"File moved from {src} to {os.path.join(dest, new_filename)}")
+        print('src',src)
+        print('dest',dest)
+        move_path =f"{dest}/{new_filename}"
+        # shutil.move(src, os.path.join(dest, new_filename))
+        shutil.move(src, move_path)
+        logger.info(f"File moved from {src} to {move_path}")
         
         if os.path.exists(src):
             os.remove(src)
@@ -201,44 +209,48 @@ def convert_to_pdf(image_path, output_pdf_path):
         logger.error(f"Error converting image to PDF: {e}")
 
 class MyHandler(FileSystemEventHandler):
-    def __init__(self, sub_folder):
+    def __init__(self, sub_folder,orgId):
         self.sub_folder = sub_folder
-
+        self.orgId = orgId
+        print(self.orgId)
     def on_created(self, event):
         if event.is_directory:
             return
         logger.info(f"New file detected: {event.src_path}")
         file_name, extension = os.path.splitext(event.src_path)
         if extension.lower() == '.pdf':
-            process_pdf(event.src_path)
-            getjson(event.src_path)
+            process_pdf(event.src_path,self.orgId)
             move_file(event.src_path, self.sub_folder)
         elif extension.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
-            pdf_path = os.path.join(self.sub_folder, os.path.basename(file_name) + '.pdf')
+            # pdf_path = os.path.join(self.sub_folder, os.path.basename(file_name) + '.pdf')
+            pdf_name = os.path.basename(file_name) + '.pdf'
+            pdf_path = f"{self.sub_folder}/{pdf_name}"
             convert_to_pdf(event.src_path, pdf_path)
-            process_pdf(pdf_path)
-            getjson(pdf_path)
+            process_pdf(pdf_path,self.orgId)
 
             move_file(pdf_path, self.sub_folder)
-
-def process_existing_files(folder_path,sub_folder):
+from pathlib import Path
+def process_existing_files(folder_path,sub_folder,orgId):
     for root, _, files in os.walk(folder_path):
         for file_name in files:
-            file_path = os.path.join(root, file_name)
+            # file_path = os.path.join(root, file_name)
+            file_path = f"{root}/{file_name}"
+           
             if os.path.isfile(file_path):
-                handle_existing_file(file_path,sub_folder)
+                handle_existing_file(file_path,sub_folder,orgId)
 
-def handle_existing_file(file_path,sub_folder):
+def handle_existing_file(file_path,sub_folder,orgId):
     file_name, extension = os.path.splitext(file_path)
     if extension.lower() == '.pdf':
-        process_pdf(file_path)
-        getjson(file_path)
+        # print('file_path1',file_path)
+        process_pdf(file_path,orgId)
         move_file(file_path, sub_folder)
     elif extension.lower() in ['.jpg', '.jpeg', '.png', '.tiff']:
-        pdf_path = os.path.join(sub_folder, os.path.basename(file_name) + '.pdf')
+        pdf_name = os.path.basename(file_name) + '.pdf'
+        pdf_path = f"{sub_folder}/{pdf_name}"
+        # pdf_path = os.path.join(sub_folder, os.path.basename(file_name) + '.pdf')
         convert_to_pdf(file_path, pdf_path)
-        process_pdf(pdf_path)
-        getjson(pdf_path)
+        process_pdf(pdf_path,orgId)
         move_file(pdf_path, sub_folder)
 
 
@@ -250,9 +262,8 @@ def Watch(data):
     orgId = data['orgId']
     main_folder = f"Invoice_Folder/{orgId}/Watch_Folder"
     sub_folder = f"Invoice_Folder/{orgId}/Process_folder"
-    process_existing_files(main_folder,sub_folder)
-    # event_handler = MyHandler()
-    event_handler = MyHandler(sub_folder)
+    process_existing_files(main_folder,sub_folder,orgId)
+    event_handler = MyHandler(sub_folder,orgId)
     observer = Observer()
     observer.schedule(event_handler, main_folder, recursive=False)
     # try:

@@ -91,7 +91,7 @@ async def get_file_content(request: Request):
             response = getResponse(raw_text,id)  
             url = { f"/documents/{raw_text}"} 
             if response:
-              print('response',response)
+            #   print('response',response)
            
               return response, url
         else:
