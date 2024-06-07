@@ -22,6 +22,7 @@ export class LoginComponent implements OnInit {
     
     const data = this.tokenservice.getOrgInfo()
     console.log(data)
+    // this.fetch_credential(data)
   }
 
   formsetup(){
@@ -58,9 +59,10 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/inbox']);
         });
     }
+
     fetch_credential(Detail:AccountModel){
       this.loginservice.fetch_accountDetail(Detail).subscribe((res:any)=>{
-        console.log(res)
+        // console.log(res)
       })
     }
 }

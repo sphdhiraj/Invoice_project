@@ -1,5 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AccountModel } from 'src/service/Model/model';
 import { LoginService } from 'src/service/login.service';
+import { TokenService } from 'src/service/token.service';
 
 @Component({
   selector: 'app-menu',
@@ -14,12 +16,15 @@ export class MenuComponent implements OnInit {
   @ViewChild('submenu') submenu: ElementRef | undefined;
   @ViewChild('menu') menu: ElementRef | undefined;
   @Input() menuModel: any[] = [];
-  constructor(private loginservice:LoginService) { }
+  constructor(private loginservice:LoginService,private tokenservice:TokenService) { }
 
   ngOnInit(): void {
     this.menuRightsListfetched = this.loginservice.GetMenuRights();
     this.menuRights = JSON.parse(this.menuRightsListfetched);
     console.log(this.menuRights)
+    const data = this.tokenservice.getOrgInfo()
+    console.log(data)
+    this.fetch_credential(data)
     this.menuArray();
 
   }
@@ -52,6 +57,9 @@ export class MenuComponent implements OnInit {
               },
               {
                 label: 'User Access ', icon: '',  visible:true, routerLink: ["/user-access-rights"]
+              },
+              {
+                label: 'User Creation ', icon: '',  visible:true, routerLink: ["/register"]
               },
 
             ]
@@ -102,5 +110,10 @@ ValidateSubModule(submoduleName:string,moduleName:string){
     return isSubmenuPresent;
 }
 
+fetch_credential(Detail:any){
+  this.loginservice.fetch_accountDetail(Detail).subscribe((res:any)=>{
+    // console.log(res)
+  })
+}
 
 }

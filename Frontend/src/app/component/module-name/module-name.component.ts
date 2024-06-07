@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Module } from 'src/service/Model/model';
+import { LoginService } from 'src/service/login.service';
 import { ModulenameService } from 'src/service/modulename.service';
 
 @Component({
@@ -10,13 +11,21 @@ import { ModulenameService } from 'src/service/modulename.service';
   styleUrls: ['./module-name.component.scss']
 })
 export class ModuleNameComponent implements OnInit {
-
+  menuRights:any = [];
+  menuRightsListfetched:any;
   ModuleForm!:FormGroup;
   modules: Module[] = [];
-  constructor(private moduleService: ModulenameService,private messageservice:MessageService) { }
+  userRights:any=[]
+  constructor(private moduleService: ModulenameService,private messageservice:MessageService,
+    private loginservice:LoginService 
+  ) { }
 
   ngOnInit(): void {
     this.formsetup();
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Module');
+     console.log(this.userRights);
   }
 
   formsetup() {

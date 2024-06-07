@@ -74,4 +74,5 @@ export class Product {
     approveAccess!:boolean;
     allAccess!: boolean;
     ModuleName!: string;
+    DisplayName!:string
   }

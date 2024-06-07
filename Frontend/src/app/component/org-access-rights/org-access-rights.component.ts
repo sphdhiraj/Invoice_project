@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Module, Organization } from 'src/service/Model/model';
+import { LoginService } from 'src/service/login.service';
 import { OrgAccessRightsService } from 'src/service/org-access-rights.service';
 
 @Component({
@@ -16,8 +17,13 @@ orgAccessForm!: FormGroup;
   organizations: Organization[] = [];
   modules: Module[] = [];
   showTable = false;
+  menuRights:any = [];
+  menuRightsListfetched:any;
+  userRights: any;
 
-  constructor(private orgAccessRightService: OrgAccessRightsService, private messageService: MessageService, private fb: FormBuilder) {
+  constructor(private orgAccessRightService: OrgAccessRightsService, private messageService: MessageService, private fb: FormBuilder,
+    private loginservice:LoginService
+  ) {
     this.orgAccessForm = this.fb.group({
       selectedOrgId: new FormControl('', Validators.required),
     });
@@ -30,6 +36,11 @@ orgAccessForm!: FormGroup;
 
   ngOnInit(): void {
     this.org_Details();
+
+    this.menuRightsListfetched = this.loginservice.GetMenuRights();
+    this.menuRights = JSON.parse(this.menuRightsListfetched);
+    this.userRights = this.menuRights.filter((e:any)=>e.displayName == 'Invoice');
+     console.log(this.userRights);
   }
 
   org_Details() {
@@ -94,6 +105,7 @@ orgAccessForm!: FormGroup;
       accessRightsId: module.accessRightsId, // Include accessRightsId if needed
       moduleId: module.moduleId,
       moduleName: module.moduleName,
+      submoduleName: module.displayName,
       orgId: selectedOrgId,
       permission: this.permissionsForm.get('permission_' + module.moduleId)?.value
     }));
