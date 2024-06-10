@@ -1681,53 +1681,6 @@ func getUsersByOrganization(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// func (mgr *manager) GetUsersByOrganization(orgID primitive.ObjectID) ([]OrganizationUserResponse, error) {
-// 	var users []OrganizationUserResponse
-
-// 	// Fetch the organization details
-// 	orgCollection := mgr.connection.Database("Invoicedatabase").Collection("organizations")
-// 	var org Organization
-// 	err := orgCollection.FindOne(context.TODO(), bson.D{{"_id", orgID}}).Decode(&org)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Query the database for users related to the organization ID
-// 	orgUserCollection := mgr.connection.Database("Invoicedatabase").Collection("organizationUsers")
-// 	filter := bson.D{{"organizationId", orgID}}
-// 	cur, err := orgUserCollection.Find(context.TODO(), filter)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer cur.Close(context.TODO())
-
-// 	for cur.Next(context.TODO()) {
-// 		var user OrganizationUser
-// 		if err := cur.Decode(&user); err != nil {
-// 			return nil, err
-// 		}
-
-// 		userResponse := OrganizationUserResponse{
-// 			UserID:         user.UserID,
-// 			OrganizationID: user.OrganizationID,
-// 			Name:           user.Name,
-// 			UserEmail:      user.UserEmail,
-// 			UserPhone:      user.UserPhone,
-// 			UserStatus:     user.UserStatus,
-// 			UserRoleID:     user.UserRoleID,
-// 			OrgName:        org.OrgName,
-// 			OrgCode:        org.OrgCode,
-// 		}
-// 		users = append(users, userResponse)
-// 	}
-
-// 	if err := cur.Err(); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return users, nil
-// }
-
 func (mgr *manager) GetUsersByOrganization(orgID primitive.ObjectID) ([]OrganizationUserResponse, error) {
 	var users []OrganizationUserResponse
 
