@@ -170,6 +170,8 @@ type Manager interface {
 	GetAccessRightsByOrgIDAndRoleID(roleID, orgID primitive.ObjectID) ([]gin.H, error)
 
 	GetOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]OrgAccessRights, error)
+
+	GetUserRolesByOrganizationID(orgID primitive.ObjectID) ([]UserRole, error)
 }
 
 func connectDb() {
@@ -266,6 +268,7 @@ func main() {
 	r.GET("/modules-access-rights/:orgid", getModuleOrgAccessRightsByOrgID)
 
 	r.GET("/access-rights/:orgId/:roleId", getAccessRightsByOrgIDAndRoleID)
+	r.GET("/user-roles-by-org/:orgId", getUserRolesByOrganizationID)
 
 	r.Run(":9090")
 
@@ -1807,4 +1810,48 @@ func (m *manager) GetOrgModuleListByOrgID(orgID primitive.ObjectID) ([]Module, e
 	}
 
 	return modules, nil
+}
+
+func getUserRolesByOrganizationID(c *gin.Context) {
+	orgID := c.Param("orgId")
+
+	objectID, err := primitive.ObjectIDFromHex(orgID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organization ID"})
+		return
+	}
+
+	roles, err := Mgr.GetUserRolesByOrganizationID(objectID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user roles"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"userRoles": roles})
+}
+
+func (mgr *manager) GetUserRolesByOrganizationID(orgID primitive.ObjectID) ([]UserRole, error) {
+	var roles []UserRole
+	roleCollection := mgr.connection.Database("Invoicedatabase").Collection("userRoles")
+	filter := bson.M{"orgId": orgID}
+
+	cur, err := roleCollection.Find(mgr.ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(mgr.ctx)
+
+	for cur.Next(mgr.ctx) {
+		var role UserRole
+		if err := cur.Decode(&role); err != nil {
+			return nil, err
+		}
+		roles = append(roles, role)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+
+	return roles, nil
 }
