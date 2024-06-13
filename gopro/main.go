@@ -44,6 +44,7 @@ type OrganizationUser struct {
 	Name           string             `json:"name" bson:"name"`
 	UserEmail      string             `json:"userEmail" bson:"userEmail"`
 	UserPhone      string             `json:"userPhone" bson:"userPhone"`
+	UserAddress    string             `json:"userAddress" bson:"userAddress"`
 	UserStatus     string             `json:"userStatus" bson:"userStatus"`
 	Password       string             `json:"password" bson:"password"`
 	UserRoleID     primitive.ObjectID `json:"userRoleId" bson:"userRoleId"`
@@ -96,6 +97,7 @@ type OrganizationUserResponse struct {
 	Name           string             `json:"name" bson:"name"`
 	UserEmail      string             `json:"userEmail" bson:"userEmail"`
 	UserPhone      string             `json:"userPhone" bson:"userPhone"`
+	UserAddress    string             `json:"userAddress" bson:"userAddress"`
 	UserStatus     string             `json:"userStatus" bson:"userStatus"`
 	UserRoleID     primitive.ObjectID `json:"userRoleId" bson:"userRoleId"`
 	OrgName        string             `json:"orgName"`
@@ -1724,6 +1726,7 @@ func (mgr *manager) GetUsersByOrganization(orgID primitive.ObjectID) ([]Organiza
 			Name:           user.Name,
 			UserEmail:      user.UserEmail,
 			UserPhone:      user.UserPhone,
+			UserAddress:    user.UserAddress,
 			UserStatus:     user.UserStatus,
 			UserRoleID:     user.UserRoleID,
 			OrgName:        org.OrgName,
