@@ -174,6 +174,8 @@ type Manager interface {
 	GetOrgAccessRightsByOrgID(orgID primitive.ObjectID) ([]OrgAccessRights, error)
 
 	GetUserRolesByOrganizationID(orgID primitive.ObjectID) ([]UserRole, error)
+
+	UpdateOrganizationUserPassword(userID primitive.ObjectID, currentPassword, newPassword string) error
 }
 
 func connectDb() {
@@ -271,6 +273,8 @@ func main() {
 
 	r.GET("/access-rights/:orgId/:roleId", getAccessRightsByOrgIDAndRoleID)
 	r.GET("/user-roles-by-org/:orgId", getUserRolesByOrganizationID)
+
+	r.POST("/update-password", updateOrganizationUserPassword)
 
 	r.Run(":9090")
 
@@ -1858,4 +1862,64 @@ func (mgr *manager) GetUserRolesByOrganizationID(orgID primitive.ObjectID) ([]Us
 	}
 
 	return roles, nil
+}
+
+func updateOrganizationUserPassword(c *gin.Context) {
+	type PasswordUpdateRequest struct {
+		UserID          string `json:"userId" binding:"required"`
+		CurrentPassword string `json:"currentPassword" binding:"required"`
+		NewPassword     string `json:"newPassword" binding:"required"`
+	}
+
+	var req PasswordUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
+		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(req.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	err = Mgr.UpdateOrganizationUserPassword(userID, req.CurrentPassword, req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
+}
+
+func (mgr *manager) UpdateOrganizationUserPassword(userID primitive.ObjectID, currentPassword, newPassword string) error {
+	// Fetch the user document from the database
+	var user OrganizationUser
+	userCollection := mgr.connection.Database("Invoicedatabase").Collection("organizationUsers")
+	filter := bson.M{"_id": userID}
+	err := userCollection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		return fmt.Errorf("user not found: %v", err)
+	}
+
+	// Compare the provided current password with the stored hashed password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(currentPassword))
+	if err != nil {
+		return fmt.Errorf("current password is incorrect: %v", err)
+	}
+
+	// Hash the new password
+	newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash new password: %v", err)
+	}
+
+	// Update the user document with the new hashed password
+	update := bson.M{"$set": bson.M{"password": string(newPasswordHash)}}
+	_, err = userCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to update password: %v", err)
+	}
+
+	return nil
 }
