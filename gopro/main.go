@@ -522,6 +522,7 @@ func loginUser(c *gin.Context) {
 			"userPhone":  user.UserPhone,
 			"userRoleId": user.UserRoleID.Hex(),
 			"userStatus": user.UserStatus,
+			"Password ":  user.Password,
 		},
 		"Organizations": gin.H{
 			"orgId":              organization.OrgID,
