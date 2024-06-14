@@ -519,14 +519,15 @@ func loginUser(c *gin.Context) {
 	response := gin.H{
 		"token": tokenString,
 		"user": gin.H{
-			"name":       user.Name,
-			"roleName":   user.UserRoleID.Hex(),
-			"userEmail":  user.UserEmail,
-			"userId":     user.UserID.Hex(),
-			"userPhone":  user.UserPhone,
-			"userRoleId": user.UserRoleID.Hex(),
-			"userStatus": user.UserStatus,
-			"Password ":  user.Password,
+			"name":        user.Name,
+			"roleName":    user.UserRoleID.Hex(),
+			"userEmail":   user.UserEmail,
+			"userId":      user.UserID.Hex(),
+			"userPhone":   user.UserPhone,
+			"userRoleId":  user.UserRoleID.Hex(),
+			"userStatus":  user.UserStatus,
+			"Password ":   user.Password,
+			"UserAddress": user.UserAddress,
 		},
 		"Organizations": gin.H{
 			"orgId":              organization.OrgID,
