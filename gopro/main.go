@@ -176,6 +176,8 @@ type Manager interface {
 	GetUserRolesByOrganizationID(orgID primitive.ObjectID) ([]UserRole, error)
 
 	UpdateOrganizationUserPassword(userID primitive.ObjectID, currentPassword, newPassword string) error
+
+	UpdateUserDetails(userID primitive.ObjectID, name, phone, address string) error
 }
 
 func connectDb() {
@@ -275,6 +277,8 @@ func main() {
 	r.GET("/user-roles-by-org/:orgId", getUserRolesByOrganizationID)
 
 	r.POST("/update-password", updateOrganizationUserPassword)
+
+	r.PUT("/update-userprofile", updateUserDetails)
 
 	r.Run(":9090")
 
@@ -1923,4 +1927,47 @@ func (mgr *manager) UpdateOrganizationUserPassword(userID primitive.ObjectID, cu
 	}
 
 	return nil
+}
+
+func updateUserDetails(c *gin.Context) {
+	var req struct {
+		UserID      string `json:"userId"`
+		Name        string `json:"name"`
+		UserPhone   string `json:"userPhone"`
+		UserAddress string `json:"userAddress"`
+	}
+
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(req.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	err = Mgr.UpdateUserDetails(userID, req.Name, req.UserPhone, req.UserAddress)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User details updated"})
+}
+
+func (m *manager) UpdateUserDetails(userID primitive.ObjectID, name, phone, address string) error {
+	collection := m.connection.Database("Invoicedatabase").Collection("organizationUsers")
+	filter := bson.M{"_id": userID}
+	update := bson.M{
+		"$set": bson.M{
+			"name":        name,
+			"userPhone":   phone,
+			"userAddress": address,
+		},
+	}
+
+	_, err := collection.UpdateOne(m.ctx, filter, update)
+	return err
 }
