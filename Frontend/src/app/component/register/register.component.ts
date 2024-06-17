@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Organization, UserRole } from 'src/service/Model/model';
 import { LoginService } from 'src/service/login.service';
@@ -17,6 +18,8 @@ export class RegisterComponent implements OnInit {
   menuRights:any = [];
   menuRightsListfetched:any;
   userRights: any;
+  userId: string | null = null;
+  isEdit = false;
 
   userStatus= [
     { value: 'Active', name: 'Active' },
@@ -24,13 +27,14 @@ export class RegisterComponent implements OnInit {
   ];
 
   constructor(private registerservice:RegisterService,private messageservice:MessageService,
-    private loginservice: LoginService
+    private loginservice: LoginService,private activatedRoute: ActivatedRoute,private router: Router
   ) { }
 
   ngOnInit(): void {
     this.formsetup();
     this.org_Details();
     this.role_Details();
+    this.getEditValues();
 
     this.menuRightsListfetched = this.loginservice.GetMenuRights();
     this.menuRights = JSON.parse(this.menuRightsListfetched);
@@ -41,14 +45,17 @@ export class RegisterComponent implements OnInit {
   formsetup() {
     const _builder = new FormBuilder();
     this.SignForm = _builder.group({
+      // name: new FormControl('', [
+      //   Validators.required,
+      // ]),
       name: new FormControl('', [
         Validators.required,
         Validators.minLength(3)
       ]),
       password: new FormControl('', [
         Validators.required,
-        Validators.minLength(8),
-        Validators.pattern('^(?=.*[0-9]).*$') 
+        //Validators.minLength(8),
+        //Validators.pattern('^(?=.*[0-9]).*$') 
       ]),
       organizationID: new FormControl('', [
         Validators.required
@@ -60,7 +67,11 @@ export class RegisterComponent implements OnInit {
       ]),
       userPhone: new FormControl('', [
         Validators.required,
-        Validators.pattern('^[0-9]{10}$') 
+        //Validators.pattern('^[0-9]{10}$') 
+      ]),
+      userAddress: new FormControl('', [
+        Validators.required,
+        Validators.minLength(3)
       ]),
       
       userStatus: ['', Validators.required],
@@ -86,6 +97,42 @@ export class RegisterComponent implements OnInit {
     });
   }
 
+  getEditValues(){
+    this.activatedRoute.queryParams.subscribe(params => {
+      this.userId = params['userId'];
+      
+      if (this.userId) {
+        this.isEdit = true;
+        this.registerservice.getUserById(this.userId).subscribe(
+          response => {
+            const user = response.user; // Access the nested user object
+            console.log('Received User:', user);
+            if (user) {
+              this.SignForm.setValue({
+                organizationID: user.organizationId,
+                //name: user.name,
+                name: user.name,
+                password: user.password,
+                userEmail: user.userEmail,
+                userPhone: user.userPhone,
+                userAddress: user.userAddress,
+                userStatus: user.userStatus,
+                userRoleId: user.userRoleId,
+              });
+            } else {
+              console.error('User data is null or undefined.');
+            }
+          },
+          error => {
+            console.error('Error fetching user details:', error);
+          }
+        );
+      } else {
+        console.error('userId is missing.');
+      }
+    });
+  }
+
   signupForm() {
     // const user = this.SignForm.get('username')?.value;
     // const password = this.SignForm.get('password')?.value;
@@ -97,14 +144,36 @@ export class RegisterComponent implements OnInit {
     }
 
     const formValues = this.SignForm.value;
-    //console.log(formValues);
-    this.registerservice.postUserDetails(formValues)
-      .subscribe((response:any) => {
-        console.log('Success!', response);
-        this.messageservice.add({severity:'success', summary: 'Success', detail:'Sign Up Succesfully'});
-      }, (error:any) => {
-        console.error('Error!', error);
-        this.messageservice.add({severity:'error', summary: 'Error', detail:'username or password already exist'});
-      });
+    //console.log(formValues)
+    if (this.isEdit) {
+      const userToUpdate = {
+        ...formValues,
+        userId: this.userId
+      };
+  
+      this.registerservice.updateUser(userToUpdate).subscribe(
+        response => {
+          console.log('User updated successfully!', response);
+          this.messageservice.add({severity:'success', summary: 'Success', detail:'User updated successfully'});
+          this.router.navigate(['/users']); // Redirect to user list or appropriate page
+        },
+        error => {
+          console.error('Error updating user:', error);
+          this.messageservice.add({severity:'error', summary: 'Error', detail:'Error updating user'});
+        }
+      );
+    } else {
+      this.registerservice.postUserDetails(formValues).subscribe(
+        response => {
+          console.log('User created successfully!', response);
+          this.messageservice.add({severity:'success', summary: 'Success', detail:'User created successfully'});
+          this.router.navigate(['/users']); // Redirect to user list or appropriate page
+        },
+        error => {
+          console.error('Error creating user:', error);
+          this.messageservice.add({severity:'error', summary: 'Error', detail:'Error creating user'});
+        }
+      );
+    }
   }
 }

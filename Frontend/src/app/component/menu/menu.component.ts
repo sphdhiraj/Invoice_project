@@ -36,6 +36,66 @@ export class MenuComponent implements OnInit {
     } else {
     }
   }
+  // menuArray() {
+  //   this.model = [
+  //     {
+  //       items: [
+  //         {
+  //           label: 'Admin', showmenu: true, icon: 'fa-solid fa-user-tie', routerLink: [""],
+  //           items: [
+  //             {
+  //               label: 'Module', icon: '',  visible:true, routerLink: ["/modules"]
+  //             },
+  //             {
+  //               label: 'Org Access', icon: '',  visible:true, routerLink: ["/org-access-rights"]
+  //             },
+  //             {
+  //               label: 'Organization', icon: '',  visible:true, routerLink: ["/organizations"]
+  //             },
+  //             {
+  //               label: 'User Role ', icon: '',  visible:true, routerLink: ["/user-roles"]
+  //             },
+  //             {
+  //               label: 'User Access ', icon: '',  visible:true, routerLink: ["/user-access-rights"]
+  //             },
+  //             {
+  //               label: 'User Creation ', icon: '',  visible:true, routerLink: ["/register"]
+  //             },
+
+  //           ]
+  //         },
+  //         {
+  //           label: 'Organization', showmenu:this.ValidateParentModule('Organization'), icon: 'fa-solid fa-building-columns', routerLink: [""],
+  //           items: [
+  //             {
+  //               label: 'Invoice', icon: '',  visible:this.ValidateSubModule('Invoice','Organization'), routerLink: ["/inbox"]
+  //             },
+  //           ]
+  //         },
+          
+  //         {
+  //           label: 'User', showmenu: true, icon: 'fa-solid fa-users', routerLink: [""],
+  //           items: [
+  //             {
+  //               label: 'User Profile', icon: '',  visible:true, routerLink: ["/user"]
+  //             },
+             
+  //             {
+  //               label: 'Update Password', icon: '',  visible:true, routerLink: ["/updatepassword"]
+  //             },
+
+  //             {
+  //               label: 'Logout', icon: '',  visible:true, routerLink: ["/logout"]
+  //             },
+  //           ]
+  //         },
+
+        
+  //       ]
+  //     },
+  //   ];
+  // }
+
   menuArray() {
     this.model = [
       {
@@ -44,55 +104,49 @@ export class MenuComponent implements OnInit {
             label: 'Admin', showmenu: true, icon: 'fa-solid fa-user-tie', routerLink: [""],
             items: [
               {
-                label: 'Module', icon: '',  visible:true, routerLink: ["/modules"]
+                label: 'Module', icon: '', visible: this.hasViewAccess('Module', 'Admin Menu'), routerLink: ["/modules"]
               },
               {
-                label: 'Org Access', icon: '',  visible:true, routerLink: ["/org-access-rights"]
+                label: 'Org Access', icon: '', visible: this.hasViewAccess('Org Access', 'Admin Menu'), routerLink: ["/org-access-rights"]
               },
               {
-                label: 'Organization', icon: '',  visible:true, routerLink: ["/organizations"]
+                label: 'Organization', icon: '', visible: this.hasViewAccess('Organization', 'Admin Menu'), routerLink: ["/organizations"]
               },
               {
-                label: 'User Role ', icon: '',  visible:true, routerLink: ["/user-roles"]
+                label: 'User Role', icon: '', visible: this.hasViewAccess('User Role', 'Admin Menu'), routerLink: ["/user-roles"]
               },
               {
-                label: 'User Access ', icon: '',  visible:true, routerLink: ["/user-access-rights"]
+                label: 'User Access', icon: '', visible: this.hasViewAccess('User Access', 'Admin Menu'), routerLink: ["/user-access-rights"]
               },
               {
-                label: 'User Creation ', icon: '',  visible:true, routerLink: ["/register"]
-              },
-
+                label: 'Users', icon: '', visible: this.hasViewAccess('Organization Users', 'Admin Menu'), routerLink: ["/users"]
+              }
             ]
           },
           {
-            label: 'Organization', showmenu:this.ValidateParentModule('Organization'), icon: 'fa-solid fa-building-columns', routerLink: [""],
+            label: 'Organization', showmenu: true, icon: 'fa-solid fa-building-columns', routerLink: [""],
             items: [
               {
-                label: 'Invoice', icon: '',  visible:this.ValidateSubModule('Invoice','Organization'), routerLink: ["/inbox"]
-              },
+                label: 'Invoice', icon: '', visible: this.hasViewAccess('Invoice', 'Organization'), routerLink: ["/inbox"]
+              }
             ]
           },
-          
           {
             label: 'User', showmenu: true, icon: 'fa-solid fa-users', routerLink: [""],
             items: [
               {
-                label: 'User Profile', icon: '',  visible:true, routerLink: ["/user"]
+                label: 'User Profile', icon: '', visible: this.hasViewAccess('User Profile', 'User'), routerLink: ["/user-profile"]
               },
-             
               {
-                label: 'Update Password', icon: '',  visible:true, routerLink: ["/updatepassword"]
+                label: 'Update Password', icon: '', visible: this.hasViewAccess('Update Password', 'User'), routerLink: ["/updatepassword"]
               },
-
               {
-                label: 'Logout', icon: '',  visible:true, routerLink: ["/logout"]
-              },
+                label: 'Logout', icon: '', visible: true, routerLink: ["/logout"]
+              }
             ]
-          },
-
-        
+          }
         ]
-      },
+      }
     ];
   }
 
@@ -114,6 +168,11 @@ fetch_credential(Detail:any){
   this.loginservice.fetch_accountDetail(Detail).subscribe((res:any)=>{
     // console.log(res)
   })
+}
+
+hasViewAccess(displayName: string, moduleName: string) {
+  const accessRight = this.menuRights.find((e: any) => e.displayName === displayName && e.moduleName === moduleName);
+  return accessRight ? accessRight.viewAccess : false;
 }
 
 }

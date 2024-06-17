@@ -13,92 +13,144 @@
 				</div>
 			</div>
 			<div class="card-body mb-2">
-				<form [formGroup]="SignForm" >
+				<form [formGroup]="SignForm">
 					<div class="row">
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
+								</div>
+								<div>
+									<select class="form-control" name="orgId" formControlName="organizationID">
+										<option value="" disabled selected>Select an organization</option>
+										<option *ngFor="let org of organizations" [value]="org.orgId">{{ org.orgName }}</option>
+									</select>
+									<div *ngIf="SignForm.get('organizationID')?.invalid && SignForm.get('organizationID')?.touched">
+										<div *ngIf="SignForm.get('organizationID')?.errors?.['required']" class="text-danger">Organization is required.</div>
+									</div>
+								</div>
+							</div>
+			     		</div>
 
-					<div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
+						<!-- <div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-file-signature"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Name" formControlName="name">
+									<div *ngIf="SignForm.get('name')?.invalid && SignForm.get('name')?.touched">
+										<div *ngIf="SignForm.get('name')?.errors?.['required']"  class="text-danger">Name is required.</div>
+									</div>
+								</div>
+							</div>
+						</div> -->
+
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Username" formControlName="name">
+									<div *ngIf="SignForm.get('name')?.invalid && SignForm.get('name')?.touched">
+										<div *ngIf="SignForm.get('name')?.errors?.['required']" class="text-danger">Username is required.</div>
+									</div>	
+								</div>
+							</div>
 						</div>
-						
-                        <select class="form-control" name="orgId" formControlName="organizationID">
-							<option *ngFor="let org of organizations" [value]="org.orgId">{{ org.orgName }}</option>
-						  </select>
-						
-					</div>
-			     	</div>
-					 <div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fas fa-key"></i></span>
+								</div>
+								<div>
+									<input type="password" class="form-control" placeholder="password" formControlName="password">
+									<div *ngIf="SignForm.get('password')?.invalid && SignForm.get('password')?.touched">
+										<div *ngIf="SignForm.get('password')?.errors?.['required']" class="text-danger">Password is required.</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<input type="text" class="form-control" placeholder="Username" formControlName="name">
-						
-					</div>
-					</div>
-					<div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fas fa-key"></i></span>
+
+				    	<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa fa-envelope"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Email" formControlName="userEmail">
+									<div *ngIf="SignForm.get('userEmail')?.invalid && SignForm.get('userEmail')?.touched">
+										<div *ngIf="SignForm.get('userEmail')?.errors?.['required']" class="text-danger">Email is required.</div>
+									</div>
+								</div>
+							</div>
+                    	</div>
+
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Phone Number" formControlName="userPhone">
+									<div *ngIf="SignForm.get('userPhone')?.invalid && SignForm.get('userPhone')?.touched">
+										<div *ngIf="SignForm.get('userPhone')?.errors?.['required']" class="text-danger">Phone is required.</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<input type="password" class="form-control" placeholder="password" formControlName="password">
-					</div>
-                   </div>
-				   <div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa fa-envelope"></i></span>
+
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-house"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Address" formControlName="userAddress">
+									<div *ngIf="SignForm.get('userAddress')?.invalid && SignForm.get('userAddress')?.touched">
+										<div *ngIf="SignForm.get('userAddress')?.errors?.['required']" class="text-danger">Address is required.</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<input type="text" class="form-control" placeholder="Email" formControlName="userEmail">
-						
-					</div>
-                    </div>
-					<div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-person-circle-question"></i></span>
+								</div>
+								<div>
+									<select class="form-control" formControlName="userStatus">
+										<option value="" disabled selected>Select status</option>
+										<option *ngFor="let sts of userStatus" [value]="sts.value">{{ sts.name }}</option>
+									</select>
+									<div *ngIf="SignForm.get('userStatus')?.invalid && SignForm.get('userStatus')?.touched">
+										<div *ngIf="SignForm.get('userStatus')?.errors?.['required']" class="text-danger">Status is required.</div>
+									</div>
+								</div>
+							</div>
 						</div>
-						<input type="text" class="form-control" placeholder="Phone Number" formControlName="userPhone">
-						
-					</div>
-                    </div>
-					<div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-person-circle-question"></i></span>
+
+						<div class="col-md-3 mb-2">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-circle-user"></i></span>
+								</div>
+								<div>
+									<select class="form-control" formControlName="userRoleId">
+										<option value="" disabled selected>Select an userrole</option>
+										<option *ngFor="let role of userRoles" [value]="role.roleId">{{ role.roleName }}</option>
+									</select>
+									<div *ngIf="SignForm.get('userRoleId')?.invalid && SignForm.get('userRoleId')?.touched">
+										<div *ngIf="SignForm.get('userRoleId')?.errors?.['required']" class="text-danger">Userrole is required.</div>  
+									</div>
+								</div>
+							</div>
 						</div>
-						
-                        <select class="form-control" formControlName="userStatus">
-							<option *ngFor="let sts of userStatus" [value]="sts.value">{{ sts.name }}</option>
-						  </select>
-						
 					</div>
-					</div>
-                    <div class="col-md-3 mb-2">
-					<div class="input-group form-group mb-4">
-						<div class="input-group-prepend">
-							<span class="input-group-text"><i class="fa-solid fa-address-book"></i></span>
-						</div>
-						
-                        <select class="form-control" formControlName="userRoleId">
-							<option *ngFor="let role of userRoles" [value]="role.roleId">{{ role.roleName }}</option>
-						  </select>
-						
-					</div>
-                   </div>
-					<!-- <div class="form-group text-right">
-						<button type="submit"  class="btn  login_btn" >Submit</button>
-					</div> -->
-				</div>
 				</form>
 			</div>
-			<!-- <div class="card-footer">
-				<div class="d-flex justify-content-center content">
-					Do you have an account?<a [routerLink]="['/login']" class="tb">login</a>
-				</div>
-				
-			</div> -->
 		</div>
 	</div>
 </div>

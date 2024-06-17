@@ -1,0 +1,131 @@
+<p-toast></p-toast>
+<!-- <div class="container body">
+	<div class="d-flex justify-content-center h-100">
+		<div class="card">
+			<div class="card-header">
+				<div class="row">
+					<div class="col-md-6">
+						<h3 class="">User Registration</h3>
+					</div>
+					<div class="col-md-6 text-right">
+						<button  class="btnchat"(click)="updateProfile()" *ngIf="userRights[0].addAccess">Submit</button>
+					</div>
+				</div>
+			</div>
+			<div class="card-body mb-2">
+				<form [formGroup]="profileForm">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Username" formControlName="username">
+									<div *ngIf="profileForm.get('username')?.invalid && profileForm.get('username')?.touched">
+										<div *ngIf="profileForm.get('username')?.errors?.['required']" class="text-danger">Username is required.</div>
+									</div>	
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-4">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Phone Number" formControlName="userPhone">
+									<div *ngIf="profileForm.get('userPhone')?.invalid && profileForm.get('userPhone')?.touched">
+										<div *ngIf="profileForm.get('userPhone')?.errors?.['required']" class="text-danger">Phone is required.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-4">
+							<div class="input-group form-group mb-4">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><i class="fa-solid fa-house"></i></span>
+								</div>
+								<div>
+									<input type="text" class="form-control" placeholder="Address" formControlName="address">
+									<div *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched">
+										<div *ngIf="profileForm.get('address')?.errors?.['required']" class="text-danger">Address is required.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div> -->
+
+<div class="container body">
+    <div class="d-flex justify-content-center h-100">
+        <div class="wrapper">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h3 class="">User Profile</h3>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <button class="btnchat" (click)="updateProfile()" *ngIf="userRights[0].addAccess">Submit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body mb-2">
+                    <form [formGroup]="profileForm">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="input-group form-group mb-4">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="form-control" placeholder="Username" formControlName="name">
+                                        <div *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+                                            <div *ngIf="profileForm.get('name')?.errors?.['required']" class="text-danger">Username is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="input-group form-group mb-4">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="form-control" placeholder="Phone Number" formControlName="userPhone">
+                                        <div *ngIf="profileForm.get('userPhone')?.invalid && profileForm.get('userPhone')?.touched">
+                                            <div *ngIf="profileForm.get('userPhone')?.errors?.['required']" class="text-danger">Phone is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="input-group form-group mb-4">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa-solid fa-house"></i></span>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="form-control" placeholder="Address" formControlName="userAddress">
+                                        <div *ngIf="profileForm.get('userAddress')?.invalid && profileForm.get('userAddress')?.touched">
+                                            <div *ngIf="profileForm.get('userAddress')?.errors?.['required']" class="text-danger">Address is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,67 @@
+
+<p-toast></p-toast>
+      <!-- <div class="container body">
+        <div class="d-flex justify-content-center h-100">
+          <div class="card w-75">
+            <div class="card-header">
+              <div class="row">
+                <div class="col-md-8"> -->
+    <div class="p-2">
+        <div class="row">
+            <div class="card">
+                <div class="card-header d-flex">
+                <div class="col-md-8 ">
+                  <h3 class="">Organization Dashboard</h3>
+                </div>
+                <div class="col-md-4 text-right">
+                   <button class="btnchat" (click)="addOrganization()" *ngIf="userRights[0].addAccess">Add</button>
+                </div>
+              </div>
+            </div>
+        </div> 
+    <div class="table-responsive">
+    <table class="table table-striped custom-table">
+      <thead>
+        <tr>
+          <th class="custom-table">Org Code</th>
+          <th class="custom-table">Org Name</th>
+          <th>Contact Person</th>
+          <th>Contact Email</th>
+          <th>Contact Phone</th>
+          <th>Status</th>
+          <th>Invoice Email</th>
+          <!-- <th>SMTP Username</th>
+          <th>SMTP URL</th>
+          <th>SMTP Port</th> -->
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let org of organizations">
+          <td>{{ org.orgCode }}</td>
+          <td>{{ org.orgName }}</td>
+          <td>{{ org.contactPerson }}</td>
+          <td>{{ org.contactPersonEmail }}</td>
+          <td>{{ org.contactPersonPhone }}</td>
+          <td>{{ org.orgStatus }}</td>
+          <td>{{ org.invoiceEmail }}</td>
+          <!-- <td>{{ org.smtpUsername }}</td>
+          <td>{{ org.smtpURL }}</td>
+          <td>{{ org.smtpPort }}</td> -->
+          <td>
+            <!-- <button class="btn btn-warning btn-sm" (click)="editOrganization(org)">Edit</button>
+            <button class="btn btn-danger btn-sm" (click)="deleteOrganization(org._id)">Delete</button> -->
+            <div class="dropdown">
+                <button class="dropbtn">⋮</button>
+                <div class="dropdown-content">
+                  <button (click)="editOrganization(org.orgId)" *ngIf="userRights[0].editAccess">Edit</button>
+                  <button (click)="deleteOrganization(org.orgId)" *ngIf="userRights[0].deleteAccess">Delete</button>
+                </div>
+                </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+  

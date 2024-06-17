@@ -25,7 +25,8 @@ export class TokenService {
     return localStorage.getItem('org') 
   }
   logout(): void {
-    this.clear();
+    //this.clear();
+    localStorage.clear();
     this.router.navigate(['/login']);
     location.reload();
   }

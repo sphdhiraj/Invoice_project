@@ -24,7 +24,7 @@
 							<div >
 								<input type="text" class="form-control" placeholder="Organization Name" formControlName="orgName">
 							     <div *ngIf="OrgForm.get('orgName')?.invalid && OrgForm.get('orgName')?.touched">
-								  <div *ngIf="OrgForm.get('orgName')?.errors?.['required']" class="text-danger"> required.</div>
+								  <div *ngIf="OrgForm.get('orgName')?.errors?.['required']" class="text-danger">Org Name is required.</div>
 							  </div>
 							</div>
 						</div>
@@ -39,7 +39,7 @@
 							<div>
 								<input type="text" class="form-control" placeholder="Organization Code" formControlName="orgCode">
 						     <div *ngIf="OrgForm.get('orgCode')?.invalid && OrgForm.get('orgCode')?.touched">
-                              <div *ngIf="OrgForm.get('orgCode')?.errors?.['required']" class="text-danger">required.</div>
+                              <div *ngIf="OrgForm.get('orgCode')?.errors?.['required']" class="text-danger">Org code is required.</div>
                              </div>
 							</div>
 						</div>
@@ -53,7 +53,7 @@
 						<div>
 							<input type="text" class="form-control" placeholder="contact Person" formControlName="contactPerson"><br>
 						<div *ngIf="OrgForm.get('contactPerson')?.invalid && OrgForm.get('contactPerson')?.touched">
-                            <div *ngIf="OrgForm.get('contact_person')?.errors?.['required']"  class="text-danger">required.</div>
+                            <div *ngIf="OrgForm.get('contactPerson')?.errors?.['required']"  class="text-danger">Person name is required.</div>
                         </div>
 						</div>
 					</div>
@@ -79,9 +79,8 @@
 						</div>
 						<div>
 							<input type="text" class="form-control" placeholder="contact Person Phone" formControlName="contactPersonPhone"><br>
-						<div *ngIf="OrgForm.get('contactPersonPhone')?.invalid && OrgForm.get('contact_person_phone')?.touched">
-                            <div *ngIf="OrgForm.get('contactPersonPhone')?.errors?.['required']">Phone number is required.</div>
-                            <div *ngIf="OrgForm.get('contactPersonPhone')?.errors?.['pattern']">Invalid phone number format.</div>
+						<div *ngIf="OrgForm.get('contactPersonPhone')?.invalid && OrgForm.get('contactPersonPhone')?.touched">
+                            <div *ngIf="OrgForm.get('contactPersonPhone')?.errors?.['required']" class="text-danger">Phone number is required.</div>
                         </div>
 						</div>
 					</div>
@@ -94,8 +93,12 @@
 						
                         <div>
 							<select class="form-control" formControlName="orgStatus" style="width:160px">
+							<option value="" disabled selected>Select status</option>
 								<option *ngFor="let sts of org_Status" [value]="sts.value">{{ sts.name }}</option>
 							  </select>
+							  <div *ngIf="OrgForm.get('orgStatus')?.invalid && OrgForm.get('orgStatus')?.touched">
+								<div *ngIf="OrgForm.get('orgStatus')?.errors?.['required']" class="text-danger">Org Status is required.</div>
+							</div>
 						</div>
 						
 					</div>
@@ -122,7 +125,7 @@
 						<div>
 							<input type="text" class="form-control" placeholder="SMTP Username" formControlName="SMTPusername"><br>
 						<div *ngIf="OrgForm.get('SMTPusername')?.invalid && OrgForm.get('SMTPusername')?.touched">
-                            <div *ngIf="OrgForm.get('SMTPusername')?.errors?.['required']"  class="text-danger">required.</div>
+                            <div *ngIf="OrgForm.get('SMTPusername')?.errors?.['required']"  class="text-danger">SMTP username required.</div>
                           </div>
 						</div>
 					</div>
@@ -135,7 +138,7 @@
 						<div>
 							<input type="password" class="form-control" placeholder="SMTP Password" formControlName="SMTPpassword">
 						<div *ngIf="OrgForm.get('SMTPpassword')?.invalid && OrgForm.get('SMTPpassword')?.touched">
-                            <div *ngIf="OrgForm.get('SMTPpassword')?.errors?.['required']">Password is required.</div>
+                            <div *ngIf="OrgForm.get('SMTPpassword')?.errors?.['required']" class="text-danger">Password is required.</div>
                           </div>
 						</div>
 					</div>
@@ -148,7 +151,7 @@
 						<div>
 							<input type="text" class="form-control" placeholder="SMTP Url" formControlName="SMTPurl"><br>
 						<div *ngIf="OrgForm.get('SMTPurl')?.invalid && OrgForm.get('SMTPurl')?.touched">
-                            <div *ngIf="OrgForm.get('SMTPurl')?.errors?.['required']">Url is required.</div>
+                            <div *ngIf="OrgForm.get('SMTPurl')?.errors?.['required']" class="text-danger">Url is required.</div>
                           </div>
 						</div>
 					</div>
@@ -161,7 +164,7 @@
 						<div>
 							<input type="text" class="form-control" placeholder="SMTP Port" formControlName="SMTPport"><br>
 						<div *ngIf="OrgForm.get('SMTPport')?.invalid && OrgForm.get('SMTPport')?.touched">
-                            <div *ngIf="OrgForm.get('SMTPport')?.errors?.['required']">Port is required.</div>
+                            <div *ngIf="OrgForm.get('SMTPport')?.errors?.['required']" class="text-danger">Port is required.</div>
                           </div>
 						</div>
 					</div>

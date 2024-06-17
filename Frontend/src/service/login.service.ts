@@ -12,6 +12,7 @@ export class LoginService {
   private apiUrl = 'http://localhost:9090/organization-users'; 
   private apiUrls = 'http://localhost:9090/login'; 
   private url = 'http://localhost:8585/api'; 
+  menuUser: any;
   constructor(private http: HttpClient) { }
 
 
@@ -22,6 +23,12 @@ export class LoginService {
   }
   loginUser(data:LoginDetail) {
     return this.http.post(this.apiUrls,data);
+  }
+
+  loginDetails() {
+    this.menuUser = localStorage.getItem('User');
+    //  console.log('this.menuRights Role Right Service',this.menuRights);
+    return this.menuUser;
   }
   
   fetch_accountDetail(detail:AccountModel){

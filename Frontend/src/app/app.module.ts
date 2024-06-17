@@ -39,6 +39,11 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
 import { MenuComponent } from './component/menu/menu.component';
 import { MenuitemComponent } from './component/menuitem/menuitem.component';
+import { OrganizationDashboardComponent } from './component/organization-dashboard/organization-dashboard.component';
+import { UserDashboardComponent } from './component/user-dashboard/user-dashboard.component';
+import { UserroleDashboardComponent } from './component/userrole-dashboard/userrole-dashboard.component';
+import { UserprofileComponent } from './component/userprofile/userprofile.component';
+import { UpdatepasswordComponent } from './component/updatepassword/updatepassword.component';
 //import { UserAccessRightsComponent } from './component/user-access-rights/user-access-rights.component';
 //import { NgSelectModule } from '@ng-select/ng-select';
 
@@ -52,6 +57,11 @@ import { MenuitemComponent } from './component/menuitem/menuitem.component';
     // MailattachementComponent,
     LoginComponent,
     ForgotpasswordComponent,
+    OrganizationDashboardComponent,
+    UserDashboardComponent,
+    UserroleDashboardComponent,
+    UserprofileComponent,
+    UpdatepasswordComponent,
     // MenuComponent,
     // MenuitemComponent,
     // RegisterComponent,

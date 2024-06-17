@@ -21,7 +21,8 @@
 							<span class="input-group-text"><i class="fa-solid fa-briefcase"></i></span>
 						</div>
 						
-                        <select class="form-control" name="orgId" formControlName="OrgID">
+                        <select class="form-control" name="OrgID" formControlName="OrgID">
+							<option value="" disabled selected>Select an organization</option>
 							<option *ngFor="let org of organizations" [value]="org.orgId">{{ org.orgName }}</option>
 						  </select>
 						
@@ -43,6 +44,7 @@
 						</div>
 						
                         <select class="form-control" formControlName="roleStatus">
+							<option value="" disabled selected>Select Status</option>
 							<option *ngFor="let sts of roleStatus" [value]="sts.value">{{ sts.name }}</option>
 						  </select>
 						

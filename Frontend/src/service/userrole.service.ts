@@ -11,6 +11,8 @@ export class UserroleService {
 
   private orgApiUrl = 'http://localhost:9090/organizations';
 
+  private roleByOrgUrl = 'http://localhost:9090/user-roles-by-org';
+
   constructor(private http: HttpClient) { }
 
   postUserRoleDetails(formValues: any) {
@@ -21,5 +23,21 @@ export class UserroleService {
     return this.http.get<any>(this.orgApiUrl).pipe(
       map(response => response.message)
     );
+  }
+
+  getUserRoleById(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}`);
+  }
+
+  getUserRoleByOrganization(orgId:string): Observable<any> {
+    return this.http.get(`${this.roleByOrgUrl}/${orgId}`);
+  }
+
+  updateUserRole(userRole: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}`, userRole);
+  }
+
+  deleteUserRole(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }

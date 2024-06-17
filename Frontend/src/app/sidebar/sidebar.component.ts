@@ -33,7 +33,7 @@ constructor(private renderer: Renderer2,private tokenser:TokenService,private ro
 }
 
 logout(){
-  localStorage.clear();
+  //localStorage.clear();
   this.router.navigate(['/login']);
 }
 }
